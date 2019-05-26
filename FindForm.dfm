@@ -40,7 +40,6 @@ object FindDlg: TFindDlg
     Font.Height = -13
     Font.Name = #65325#65331' '#12468#12471#12483#12463
     Font.Style = []
-    ItemHeight = 13
     ParentFont = False
     TabOrder = 0
     OnChange = cmbFindWordChange

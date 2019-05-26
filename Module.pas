@@ -3,8 +3,8 @@ unit Module;
 interface
 
 uses
-  Windows, Classes, Controls, ImgList, AppEvnts, ComCtrls, ToolsAPI, Dialogs, Forms,
-  System.ImageList, System.Rtti, System.Actions, Vcl.ActnList;
+  Windows, Classes, Controls, ImgList, AppEvnts, ComCtrls, ToolsAPI, Dialogs, Forms, System.SysUtils,
+  System.ImageList, System.Rtti, System.Actions, Vcl.ActnList, Vcl.ExtCtrls, Clipbrd;
 
 procedure Register;
 
@@ -12,36 +12,21 @@ type
   TMainModule = class(TDataModule)
     IconList: TImageList;
     ApplicationEvents: TApplicationEvents;
-    ActionList: TActionList;
-    Action1: TAction;
-    Action2: TAction;
-    Action3: TAction;
-    Action4: TAction;
-    Action5: TAction;
-    Action6: TAction;
-    Action7: TAction;
-    Action8: TAction;
-    Action9: TAction;
-    Action10: TAction;
-    Action11: TAction;
-    Action12: TAction;
-    Action13: TAction;
-    Action14: TAction;
-    Action15: TAction;
     procedure ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
-  private
-    FSearchText: string;
     procedure OnSetBookmarkClick(Sender: TObject);
     procedure OnNextBookmarkClick(Sender: TObject);
     procedure OnFindFormClick(Sender: TObject);
     procedure OnNextFindClick(Sender: TObject);
     procedure OnIndentClick(Sender: TObject);
     procedure OnCommentClick(Sender: TObject);
-    procedure SetButtonEnabled(ButtonName: string; Enabled: Boolean);
-  public
     procedure OnShowMethodFormClick(Sender: TObject);
+  private
+    FActions: array of TAction;
+    FSearchText: string;
+    procedure SetActionEnabled(ActionName: string; Enabled: Boolean);
+  public
     procedure Indent(Sign: Integer);
   end;
 
@@ -63,15 +48,43 @@ uses
 
 const
   TOOLBAR_NAME = 'IDEEditToolBarEx';
+  ButtonNames:array[0..1] of string = ('aa','bb');
 
 //*****************************************************************************
 //[ 概  要 ]　Toolbarとその中のToolButtonの作成を行う
 //*****************************************************************************
 procedure TMainModule.DataModuleCreate(Sender: TObject);
+const
+  ButtonName: array[0..10] of string = (
+    'SetBookmark'  ,
+    'NextBookmark' ,
+    'PrevBookmark' ,
+    'FindForm'     ,
+    'NextFind'     ,
+    'PrevFind'     ,
+    'Indent'       ,
+    'Outdent'      ,
+    'Comment'      ,
+    'UnComment'    ,
+    'ShowMethods');
+  ButtonHint: array[0..10] of string = (
+    'しおりの設定/解除'  ,
+    '直後のしおり' ,
+    '直前のしおり' ,
+    '検索'     ,
+    '後方検索'     ,
+    '前方検索'     ,
+    'インデント'       ,
+    'インデント解除'      ,
+    'コメント化'      ,
+    'コメント解除'    ,
+    'メソッド一覧');
 var
   IDEServices: INTAServices;
   ToolBar: TToolBar;
   ToolButton: TToolButton;
+  i: Integer;
+  Events: array[0..10] of TNotifyEvent;
 begin
   FSearchText := '';
   IDEServices := (BorlandIDEServices as INTAServices);
@@ -79,110 +92,55 @@ begin
   Assert(Assigned(ToolBar), 'ユーザ定義のツールバーの作成に失敗しました');
   ToolBar.Images := IconList;
 
+  //ToolButtonにはIDEServices.ActionListにひもづけたTActionを設定しないと
+  //削除時にに不具合が生じるためIDEServices.ActionListとのひもづけを行う
+  SetLength(FActions, 12);
+  for i := 0 to 10 do
+  begin
+    FActions[i] := TAction.Create(IDEServices.ActionList);
+    FActions[i].ActionList := IDEServices.ActionList;
+  end;
+  Events[0] := OnSetBookmarkClick;
+  Events[1] := OnNextBookmarkClick;
+  Events[2] := OnNextBookmarkClick;
+  Events[3] := OnFindFormClick;
+  Events[4] := OnNextFindClick;
+  Events[5] := OnNextFindClick;
+  Events[6] := OnIndentClick;
+  Events[7] := OnIndentClick;
+  Events[8] := OnCommentClick;
+  Events[9] := OnCommentClick;
+  Events[10]:= OnShowMethodFormClick;
+
   //第4引数をTrueにすればStyle=tbsDividerとなるが、第3引数の設定が不要になる
   //第4引数をFalseにすればTSpeedButtonが作成されるみたいだ
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'SetBookmark',nil ,True) as TToolButton;
-  with ToolButton do
+  for i := 0 to 10 do
   begin
-    Style      := tbsButton;
-    OnClick    := OnSetBookmarkClick;
-    ImageIndex := 0;
-    Hint       := 'しおりの設定/解除';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'NextBookmark',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnNextBookmarkClick;
-    ImageIndex := 1;
-    Hint       := '次のしおり';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'PrevBookmark',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnNextBookmarkClick;
-    ImageIndex := 2;
-    Hint       := '直前のしおり';
+    //セパレータの設定
+    case i of
+      3: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
+      6: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
+      8: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
+    end;
+    with FActions[i] do
+    begin
+      ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,ButtonName[i] ,nil ,True) as TToolButton;
+      Name       := ButtonName[i];
+      Hint       := ButtonHint[i];
+      OnExecute  := Events[i];
+      ImageIndex := i;
+    end;
+    with ToolButton do
+    begin
+      Style      := tbsButton;
+      Action     := FActions[i];
+    end;
   end;
 
-  //セパレータ
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'FindForm',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnFindFormClick;
-    ImageIndex := 3;
-    Hint       := '検索';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'NextFind',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnNextFindClick;
-    ImageIndex := 4;
-    Hint       := '後方検索';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'PrevFind',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnNextFindClick;
-    ImageIndex := 5;
-    Hint       := '前方検索';
-  end;
+  //最後のボタンの廃棄がなければ、ボタンの表示が正しくならないのでダミーを作成し、即廃棄
+  IDEServices.AddToolButton(TOOLBAR_NAME,'Dummy',nil ,True).Free;
 
-  //セパレータ
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'Indent',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnIndentClick;
-    ImageIndex := 6;
-    Hint       := 'インデント';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'Outdent',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnIndentClick;
-    ImageIndex := 7;
-    Hint       := 'インデント解除';
-  end;
-
-  //セパレータ
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'Comment',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnCommentClick;
-    ImageIndex := 8;
-    Hint       := 'コメント化';
-  end;
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'UnComment',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnCommentClick;
-    ImageIndex := 9;
-    Hint       := 'コメント解除';
-  end;
-
-  //セパレータ
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Divider4',nil ,True);
-  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ShowMethods',nil ,True) as TToolButton;
-  with ToolButton do
-  begin
-    Style      := tbsButton;
-    OnClick    := OnShowMethodFormClick;
-    ImageIndex := 10;
-    Hint       := 'メソッド一覧';
-  end;
-
-//  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ElseMenu',nil ,True) as TToolButton;
+  //  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ElseMenu',nil ,True) as TToolButton;
 //  with ToolButton do
 //  begin
 //    Style := tbsButton;
@@ -190,13 +148,11 @@ begin
 //    ImageIndex := 11;
 //  end;
 
-  //最後のボタンの廃棄がなければ、ボタンの表示が正しくならないのでダミーを作成し、即廃棄
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Dummy',nil ,True).Free;
-
   //初期設定
   ToolBar.Visible := True;
   FindDlg := TFindDlg.Create(Self);
   MethodListForm := TMethodListForm.Create(Self);
+
 end;
 
 //*****************************************************************************
@@ -204,12 +160,14 @@ end;
 //*****************************************************************************
 procedure TMainModule.DataModuleDestroy(Sender: TObject);
 var
-  EditToolBar: TToolBar;
+  i: Integer;
 begin
   FindDlg.Free;
   MethodListForm.Free;
-  EditToolBar := (BorlandIDEServices as INTAServices).ToolBar[TOOLBAR_NAME];
-  if Assigned(EditToolBar) then EditToolBar.Free;
+  for i := 0 to 10 do
+  begin
+    FActions[i].Free;
+  end;
 end;
 
 //*****************************************************************************
@@ -263,7 +221,7 @@ var
 begin
   if not CheckEditView() then Exit;
 
-  case (Sender as TComponent).Name[1] of
+  case (Sender as TAction).Name[1] of
   'N': //NextBookmark
     begin
       //直後のBookMarkIDを取得
@@ -362,7 +320,7 @@ begin
   EditView.Block.Save;
   EditView.Position.Save;
 
-  case (Sender as TComponent).Name[1] of
+  case (Sender as TAction).Name[1] of
   'N': //NextFind
     begin
       EditView.Position.MoveRelative(0, 1);
@@ -518,51 +476,45 @@ end;
 procedure TMainModule.ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
 var
   UsedBookMarkCount: Integer;
-//  ST: SYSTEMTIME;
 begin
-//  GetLocalTime(ST);
-//  OutputDebugString(PChar(Format('時刻 %2d:%2d:%2d.%3d    Name:%s   ClassName:%s',
-//   [ST.wHour, ST.wMinute, ST.wSecond, ST.wMilliseconds,
-//    TComponent(Sender).Name, Sender.ClassType.ClassName])));
-
   if not CheckEditView() then
   begin
-    SetButtonEnabled('SetBookmark' , False);
-    SetButtonEnabled('NextBookmark', False);
-    SetButtonEnabled('PrevBookmark', False);
-    SetButtonEnabled('FindForm'    , False);
-    SetButtonEnabled('NextFind'    , False);
-    SetButtonEnabled('PrevFind'    , False);
-    SetButtonEnabled('Indent'      , False);
-    SetButtonEnabled('Outdent'     , False);
-    SetButtonEnabled('Comment'     , False);
-    SetButtonEnabled('UnComment'   , False);
-    SetButtonEnabled('ShowMethods' , False);
+    SetActionEnabled('SetBookmark' , False);
+    SetActionEnabled('NextBookmark', False);
+    SetActionEnabled('PrevBookmark', False);
+    SetActionEnabled('FindForm'    , False);
+    SetActionEnabled('NextFind'    , False);
+    SetActionEnabled('PrevFind'    , False);
+    SetActionEnabled('Indent'      , False);
+    SetActionEnabled('Outdent'     , False);
+    SetActionEnabled('Comment'     , False);
+    SetActionEnabled('UnComment'   , False);
+    SetActionEnabled('ShowMethods' , False);
     Exit;
   end;
 
-  SetButtonEnabled('NextFind', (FSearchText <> ''));
-  SetButtonEnabled('PrevFind', (FSearchText <> ''));
+  SetActionEnabled('NextFind', (FSearchText <> ''));
+  SetActionEnabled('PrevFind', (FSearchText <> ''));
 
   UsedBookMarkCount := GetUsedBookMarkCount();
-  SetButtonEnabled('NextBookmark', (UsedBookMarkCount > 0));
-  SetButtonEnabled('PrevBookmark', (UsedBookMarkCount > 0));
+  SetActionEnabled('NextBookmark', (UsedBookMarkCount > 0));
+  SetActionEnabled('PrevBookmark', (UsedBookMarkCount > 0));
 
-  SetButtonEnabled('SetBookmark', True);
-  SetButtonEnabled('FindForm'   , True);
-  SetButtonEnabled('Indent'     , True);
-  SetButtonEnabled('Outdent'    , True);
-  SetButtonEnabled('Comment'    , True);
-  SetButtonEnabled('UnComment'  , True);
-  SetButtonEnabled('ShowMethods', True);
+  SetActionEnabled('SetBookmark', True);
+  SetActionEnabled('FindForm'   , True);
+  SetActionEnabled('Indent'     , True);
+  SetActionEnabled('Outdent'    , True);
+  SetActionEnabled('Comment'    , True);
+  SetActionEnabled('UnComment'  , True);
+  SetActionEnabled('ShowMethods', True);
 end;
 
 //*****************************************************************************
 //[ 概  要 ]　ToolButtonのEnabledを設定する
 //[ 引  数 ]　ボタン名と設定するEnabled
 //*****************************************************************************
-procedure TMainModule.SetButtonEnabled(ButtonName: string; Enabled: Boolean);
-  function GetButtonFromName(ButtonName: string): TToolButton;
+procedure TMainModule.SetActionEnabled(ActionName: string; Enabled: Boolean);
+  function GetActionFromName(ActionName: string): TAction;
   var
     EditToolBar: TToolBar;
     i: Integer;
@@ -573,22 +525,22 @@ procedure TMainModule.SetButtonEnabled(ButtonName: string; Enabled: Boolean);
     EditToolBar := (BorlandIDEServices as INTAServices).ToolBar[TOOLBAR_NAME];
     if not Assigned(EditToolBar) then Exit;
 
-    for i := 0 to EditToolBar.ButtonCount - 1 do
+    for i := 0 to High(FActions) - 1 do
     begin
       ToolButton := EditToolBar.Buttons[i];
-      if ToolButton.Name = ButtonName then
+      if FActions[i].Name = ActionName then
       begin
-        Result := ToolButton;
+        Result := FActions[i];
         Exit;
       end;
     end;
   end;
 var
-  ToolButton: TToolButton;
+  Action: TAction;
 begin
-  ToolButton := GetButtonFromName(ButtonName);
-  if Assigned(ToolButton) then
-    ToolButton.Enabled := Enabled;
+  Action := GetActionFromName(ActionName);
+  if Assigned(Action) then
+    Action.Enabled := Enabled;
 end;
 
 //*****************************************************************************
@@ -657,7 +609,6 @@ end;
 procedure Register;
 begin
   IDENo1 := (BorlandIDEServices as IOTAServices).AddNotifier(TIDENotifier.Create);
-
   MainModule := TMainModule.Create(nil);
 end;
 
@@ -668,8 +619,7 @@ procedure UnRegister;
 type
   TToolbarArray = array of TWinControl;
 var
-  toolbar: TToolBar;
-  i: Integer;
+  Toolbar: TToolBar;
   procedure RemoveFromToolbars(AToolBar: TToolBar);
   var
     ctx: TRttiContext;
@@ -708,9 +658,9 @@ var
     TValue.From(Toolbars).ExtractRawData(PByte(Application.MainForm) + fld.Offset);
   end;
 begin
-  toolbar := (BorlandIDEServices as INTAServices).ToolBar[TOOLBAR_NAME];
-  RemoveFromToolbars(toolbar);
-  toolbar.Free;
+  Toolbar := (BorlandIDEServices as INTAServices).ToolBar[TOOLBAR_NAME];
+  RemoveFromToolbars(Toolbar);
+  Toolbar.Free;
 
   (BorlandIDEServices as IOTAServices).RemoveNotifier(IDENo1);
   MainModule.Free;

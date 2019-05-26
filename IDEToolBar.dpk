@@ -35,11 +35,11 @@ requires
   vcl;
 
 contains
-  Module in 'Module.pas' {tti: TDataModule},
-  FindForm in 'FindForm.pas' {FindForm},
-  MethodForm in 'MethodForm.pas' {MethodListForm},
+  FindForm in 'FindForm.pas' {FindDlg},
   GlobalUnit in 'GlobalUnit.pas',
   KeyBinding in 'KeyBinding.pas',
-  OnDebug in 'OnDebug.pas';
+  MethodForm in 'MethodForm.pas' {MethodListForm},
+  OnDebug in 'OnDebug.pas',
+  Module in 'Module.pas' {MainModule: TDataModule};
 
 end.

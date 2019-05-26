@@ -1,2 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<BorlandProject/>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019/05/25 15:50:13.000.261,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\FindForm.pas=</Transaction>
+    <Transaction>2019/05/25 15:50:21.000.027,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\GlobalUnit.pas=</Transaction>
+    <Transaction>2019/05/25 15:50:26.000.578,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\KeyBinding.pas=</Transaction>
+    <Transaction>2019/05/25 15:50:46.000.166,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas=</Transaction>
+    <Transaction>2019/05/25 15:50:51.000.276,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\MethodForm.pas=</Transaction>
+    <Transaction>2019/05/25 15:50:56.000.277,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\OnDebug.pas=</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.585,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\GlobalUnit.pas</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.671,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.636,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\MethodForm.pas</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.600,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\KeyBinding.pas</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.686,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\OnDebug.pas</Transaction>
+    <Transaction>2019/05/25 15:51:18.000.570,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\FindForm.pas</Transaction>
+    <Transaction>2019/05/26 06:36:46.000.841,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\FindForm.pas=</Transaction>
+    <Transaction>2019/05/26 06:36:50.000.902,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\GlobalUnit.pas=</Transaction>
+    <Transaction>2019/05/26 06:36:54.000.172,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\KeyBinding.pas=</Transaction>
+    <Transaction>2019/05/26 06:36:58.000.543,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\MethodForm.pas=</Transaction>
+    <Transaction>2019/05/26 06:37:04.000.551,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas=</Transaction>
+    <Transaction>2019/05/26 06:37:09.000.189,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\OnDebug.pas=</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.512,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\MethodForm.pas</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.414,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\FindForm.pas</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.460,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\KeyBinding.pas</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.562,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.583,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\OnDebug.pas</Transaction>
+    <Transaction>2019/05/26 06:37:20.000.438,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\GlobalUnit.pas</Transaction>
+    <Transaction>2019/05/26 08:40:03.000.915,D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas=</Transaction>
+    <Transaction>2019/05/26 08:40:16.000.004,=D:\OneDrive\ドキュメント\Borland Studio Projects\IDEToolbarEx\Module.pas</Transaction>
+  </Transactions>
+</BorlandProject>

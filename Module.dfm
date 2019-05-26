@@ -545,62 +545,7 @@ object MainModule: TMainModule
   end
   object ApplicationEvents: TApplicationEvents
     OnIdle = ApplicationEventsIdle
-    Left = 44
-    Top = 20
-  end
-  object ActionList: TActionList
-    Left = 120
-    Top = 56
-    object Action1: TAction
-      Caption = 'Action1'
-      ImageIndex = 0
-    end
-    object Action2: TAction
-      Caption = 'Action2'
-      ImageIndex = 1
-    end
-    object Action3: TAction
-      Caption = 'Action3'
-      ImageIndex = 2
-    end
-    object Action4: TAction
-      Caption = 'Action4'
-      ImageIndex = 3
-    end
-    object Action5: TAction
-      Caption = 'Action5'
-      ImageIndex = 4
-    end
-    object Action6: TAction
-      Caption = 'Action6'
-      ImageIndex = 5
-    end
-    object Action7: TAction
-      Caption = 'Action7'
-    end
-    object Action8: TAction
-      Caption = 'Action8'
-    end
-    object Action9: TAction
-      Caption = 'Action9'
-    end
-    object Action10: TAction
-      Caption = 'Action10'
-    end
-    object Action11: TAction
-      Caption = 'Action11'
-    end
-    object Action12: TAction
-      Caption = 'Action12'
-    end
-    object Action13: TAction
-      Caption = 'Action13'
-    end
-    object Action14: TAction
-      Caption = 'Action14'
-    end
-    object Action15: TAction
-      Caption = 'Action15'
-    end
+    Left = 104
+    Top = 32
   end
 end
