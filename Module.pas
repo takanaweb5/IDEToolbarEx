@@ -1,10 +1,10 @@
-unit Module;
+ï»¿unit Module;
 
 interface
 
 uses
   Windows, Classes, Controls, ImgList, AppEvnts, ComCtrls, ToolsAPI, Dialogs, Forms, System.SysUtils,
-  System.ImageList, System.Rtti, System.Actions, Vcl.ActnList, Vcl.ExtCtrls, Clipbrd;
+  System.ImageList, System.Rtti, System.Actions, Vcl.ActnList, Vcl.ExtCtrls, Clipbrd, Vcl.Graphics, Vcl.Menus;
 
 procedure Register;
 
@@ -17,8 +17,6 @@ type
     procedure DataModuleDestroy(Sender: TObject);
     procedure OnSetBookmarkClick(Sender: TObject);
     procedure OnNextBookmarkClick(Sender: TObject);
-    procedure OnFindFormClick(Sender: TObject);
-    procedure OnNextFindClick(Sender: TObject);
     procedure OnIndentClick(Sender: TObject);
     procedure OnCommentClick(Sender: TObject);
     procedure OnShowMethodFormClick(Sender: TObject);
@@ -30,105 +28,114 @@ type
     procedure Indent(Sign: Integer);
   end;
 
-  TIDENotifier = class(TNotifierObject, IOTAIDENotifier)
-  private
-    procedure FileNotification(NotifyCode: TOTAFileNotification; const FileName: string; var Cancel: Boolean);
-    procedure BeforeCompile(const Project: IOTAProject; var Cancel: Boolean); overload;
-    procedure AfterCompile(Succeeded: Boolean); overload;
-  end;
 var
   MainModule: TMainModule;
-  IDENo1: Integer;
 
-implementation
+ implementation
 {$R *.dfm}
 
 uses
-  FindForm, MethodForm, GlobalUnit;
+  MethodForm, GlobalUnit;
 
 const
   TOOLBAR_NAME = 'IDEEditToolBarEx';
-  ButtonNames:array[0..1] of string = ('aa','bb');
 
 //*****************************************************************************
-//[ ŠT  —v ]@Toolbar‚Æ‚»‚Ì’†‚ÌToolButton‚Ìì¬‚ğs‚¤
+//[ æ¦‚  è¦ ]ã€€Toolbarã¨ãã®ä¸­ã®ToolButtonã®ä½œæˆã‚’è¡Œã†
 //*****************************************************************************
 procedure TMainModule.DataModuleCreate(Sender: TObject);
 const
-  ButtonName: array[0..10] of string = (
+  ButtonName: array[0..7] of string = (
     'SetBookmark'  ,
     'NextBookmark' ,
     'PrevBookmark' ,
-    'FindForm'     ,
-    'NextFind'     ,
-    'PrevFind'     ,
     'Indent'       ,
     'Outdent'      ,
     'Comment'      ,
     'UnComment'    ,
     'ShowMethods');
-  ButtonHint: array[0..10] of string = (
-    '‚µ‚¨‚è‚Ìİ’è/‰ğœ'  ,
-    '’¼Œã‚Ì‚µ‚¨‚è' ,
-    '’¼‘O‚Ì‚µ‚¨‚è' ,
-    'ŒŸõ'     ,
-    'Œã•ûŒŸõ'     ,
-    '‘O•ûŒŸõ'     ,
-    'ƒCƒ“ƒfƒ“ƒg'       ,
-    'ƒCƒ“ƒfƒ“ƒg‰ğœ'      ,
-    'ƒRƒƒ“ƒg‰»'      ,
-    'ƒRƒƒ“ƒg‰ğœ'    ,
-    'ƒƒ\ƒbƒhˆê——');
+  ButtonHint: array[0..7] of string = (
+    'ã—ãŠã‚Šã®è¨­å®š/è§£é™¤'  ,
+    'ç›´å¾Œã®ã—ãŠã‚Š' ,
+    'ç›´å‰ã®ã—ãŠã‚Š' ,
+    'ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆ'       ,
+    'ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆè§£é™¤'      ,
+    'ã‚³ãƒ¡ãƒ³ãƒˆåŒ–'      ,
+    'ã‚³ãƒ¡ãƒ³ãƒˆè§£é™¤'    ,
+    'ãƒ¡ã‚½ãƒƒãƒ‰ä¸€è¦§');
 var
   IDEServices: INTAServices;
   ToolBar: TToolBar;
   ToolButton: TToolButton;
   i: Integer;
-  Events: array[0..10] of TNotifyEvent;
+  Events: array[0..7] of TNotifyEvent;
+  Icon: TIcon;
+  function GetIndexFromActionList(ActionName: string): Integer;
+  var
+    i: Integer;
+  begin
+    Result := -1;
+    for i := 0 to IDEServices.ActionList.ActionCount - 1 do
+    begin
+      if IDEServices.ActionList[i].Name = ActionName then
+      begin
+        Result := i;
+        Exit;
+      end;
+    end;
+  end;
 begin
   FSearchText := '';
   IDEServices := (BorlandIDEServices as INTAServices);
-  ToolBar := IDEServices.NewToolbar(TOOLBAR_NAME, 'ƒ†[ƒU’è‹`ƒc[ƒ‹ƒo[');
-  Assert(Assigned(ToolBar), 'ƒ†[ƒU’è‹`‚Ìƒc[ƒ‹ƒo[‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½');
-  ToolBar.Images := IconList;
+  ToolBar := IDEServices.NewToolbar(TOOLBAR_NAME, 'ãƒ¦ãƒ¼ã‚¶å®šç¾©ãƒ„ãƒ¼ãƒ«ãƒãƒ¼');
+  Assert(Assigned(ToolBar), 'ãƒ¦ãƒ¼ã‚¶å®šç¾©ã®ãƒ„ãƒ¼ãƒ«ãƒãƒ¼ã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸ');
 
-  //ToolButton‚É‚ÍIDEServices.ActionList‚É‚Ğ‚à‚Ã‚¯‚½TAction‚ğİ’è‚µ‚È‚¢‚Æ
-  //íœ‚É‚É•s‹ï‡‚ª¶‚¶‚é‚½‚ßIDEServices.ActionList‚Æ‚Ì‚Ğ‚à‚Ã‚¯‚ğs‚¤
-  SetLength(FActions, 12);
-  for i := 0 to 10 do
+  SetLength(FActions, 8);
+  for i := 0 to High(FActions) do
   begin
-    FActions[i] := TAction.Create(IDEServices.ActionList);
-    FActions[i].ActionList := IDEServices.ActionList;
+    FActions[i] := TAction.Create(nil);
   end;
   Events[0] := OnSetBookmarkClick;
   Events[1] := OnNextBookmarkClick;
   Events[2] := OnNextBookmarkClick;
-  Events[3] := OnFindFormClick;
-  Events[4] := OnNextFindClick;
-  Events[5] := OnNextFindClick;
-  Events[6] := OnIndentClick;
-  Events[7] := OnIndentClick;
-  Events[8] := OnCommentClick;
-  Events[9] := OnCommentClick;
-  Events[10]:= OnShowMethodFormClick;
+  Events[3] := OnIndentClick;
+  Events[4] := OnIndentClick;
+  Events[5] := OnCommentClick;
+  Events[6] := OnCommentClick;
+  Events[7] := OnShowMethodFormClick;
 
-  //‘æ4ˆø”‚ğTrue‚É‚·‚ê‚ÎStyle=tbsDivider‚Æ‚È‚é‚ªA‘æ3ˆø”‚Ìİ’è‚ª•s—v‚É‚È‚é
-  //‘æ4ˆø”‚ğFalse‚É‚·‚ê‚ÎTSpeedButton‚ªì¬‚³‚ê‚é‚İ‚½‚¢‚¾
-  for i := 0 to 10 do
+  //ç¬¬4å¼•æ•°ã‚’Trueã«ã™ã‚Œã°Style=tbsDividerã¨ãªã‚‹ãŒã€ç¬¬3å¼•æ•°ã®è¨­å®šãŒä¸è¦ã«ãªã‚‹
+  //ç¬¬4å¼•æ•°ã‚’Falseã«ã™ã‚Œã°TSpeedButtonãŒä½œæˆã•ã‚Œã‚‹ã¿ãŸã„ã 
+  for i := 0 to High(FActions) do
   begin
-    //ƒZƒpƒŒ[ƒ^‚Ìİ’è
+    //ã‚»ãƒ‘ãƒ¬ãƒ¼ã‚¿ã®è¨­å®š
     case i of
-      3: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
-      6: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
-      8: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
+      3:begin
+        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
+        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
+      end;
+      5: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
     end;
+    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,ButtonName[i] ,nil ,True) as TToolButton;
     with FActions[i] do
     begin
-      ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,ButtonName[i] ,nil ,True) as TToolButton;
+      Category   := 'ãƒ¦ãƒ¼ã‚¶å®šç¾©ãƒ„ãƒ¼ãƒ«ãƒãƒ¼';
       Name       := ButtonName[i];
       Hint       := ButtonHint[i];
+      Caption    := ButtonHint[i];
       OnExecute  := Events[i];
-      ImageIndex := i;
+      case i of
+        7: ShortCut := TextToShortCut('F10');
+      end;
+    end;
+    //IDEServices.ActionListã¨ã®ã²ã‚‚ã¥ã‘ã‚’è¡Œã†
+    IDEServices.AddActionMenu('', FActions[i] , nil);
+    Icon := TIcon.Create;
+    try
+      IconList.GetIcon(i,Icon);
+      FActions[i].ImageIndex := FActions[i].Images.AddIcon(Icon);
+    finally
+      Icon.Free;
     end;
     with ToolButton do
     begin
@@ -137,10 +144,30 @@ begin
     end;
   end;
 
-  //ÅŒã‚Ìƒ{ƒ^ƒ“‚Ì”pŠü‚ª‚È‚¯‚ê‚ÎAƒ{ƒ^ƒ“‚Ì•\¦‚ª³‚µ‚­‚È‚ç‚È‚¢‚Ì‚Åƒ_ƒ~[‚ğì¬‚µA‘¦”pŠü
-  IDEServices.AddToolButton(TOOLBAR_NAME,'Dummy',nil ,True).Free;
+  //æ¬¡ã‚’æ¤œç´¢ãƒœã‚¿ãƒ³
+  i := GetIndexFromActionList('SearchAgainCommand');
+  if i <> -1 then
+  begin
+    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'FindNext' ,nil, True, 'Divider1') as TToolButton;
+    with ToolButton do
+    begin
+      Style      := tbsButton;
+      Action     := IDEServices.ActionList[i];
+    end;
+  end;
+  //æ¤œç´¢ãƒœã‚¿ãƒ³
+  i := GetIndexFromActionList('SearchFindCommand');
+  if i <> -1 then
+  begin
+    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'Find' ,nil ,True, 'Divider1') as TToolButton;
+    with ToolButton do
+    begin
+      Style      := tbsButton;
+      Action     := IDEServices.ActionList[i];
+    end;
+  end;
 
-  //  ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ElseMenu',nil ,True) as TToolButton;
+//    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ElseMenu',nil ,True) as TToolButton;
 //  with ToolButton do
 //  begin
 //    Style := tbsButton;
@@ -148,31 +175,29 @@ begin
 //    ImageIndex := 11;
 //  end;
 
-  //‰Šúİ’è
+  //åˆæœŸè¨­å®š
+  ToolBar.Perform(CM_RECREATEWND, 0, 0);//ãƒœã‚¿ãƒ³ãŒå¤‰ã«ãªã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹ãŠã¾ã˜ãªã„
   ToolBar.Visible := True;
-  FindDlg := TFindDlg.Create(Self);
   MethodListForm := TMethodListForm.Create(Self);
-
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@Toolbar‚ğ”jŠü‚·‚é
+//[ æ¦‚  è¦ ]ã€€Toolbarã‚’ç ´æ£„ã™ã‚‹
 //*****************************************************************************
 procedure TMainModule.DataModuleDestroy(Sender: TObject);
 var
   i: Integer;
 begin
-  FindDlg.Free;
   MethodListForm.Free;
-  for i := 0 to 10 do
+  for i := 0 to High(FActions) do
   begin
     FActions[i].Free;
   end;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@‚µ‚¨‚è‚Ìİ’è/‰ğœƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹s‚Ì‚µ‚¨‚è‚Ìİ’è‚Ü‚½‚Í‰ğœ‚ğs‚¤
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã—ãŠã‚Šã®è¨­å®š/è§£é™¤ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«è¡Œã®ã—ãŠã‚Šã®è¨­å®šã¾ãŸã¯è§£é™¤ã‚’è¡Œã†
 //*****************************************************************************
 procedure TMainModule.OnSetBookmarkClick(Sender: TObject);
 var
@@ -181,39 +206,39 @@ var
 begin
   if not CheckEditView() then Exit;
 
-  //Œ»İˆÊ’u
+  //ç¾åœ¨ä½ç½®
   Row := EditView.Position.Row;
 
   BookMarkID := GetActLineBookMarkID();
   if BookMarkID >= 0 then
   begin
-    //‚µ‚¨‚è‚Ì‰ğœ
+    //ã—ãŠã‚Šã®è§£é™¤
     EditView.BookmarkToggle(BookMarkID);
   end
   else
   begin
-    //‚µ‚¨‚è‚Ìİ’è
+    //ã—ãŠã‚Šã®è¨­å®š
     BookMarkID := GetUnusedBookMarkID();
     if BookMarkID < 10 then
     begin
-      //s‚Ìæ“ª‚É‚µ‚¨‚è‚ğİ’è
+      //è¡Œã®å…ˆé ­ã«ã—ãŠã‚Šã‚’è¨­å®š
       EditView.Position.Move(Row, 1);
       EditView.BookmarkRecord(BookMarkID);
      end
     else
     begin
-      MessageDlg('‚µ‚¨‚è‚Í10ŒÂ‚Ü‚Å‚µ‚©İ’è‚Å‚«‚Ü‚¹‚ñ', mtInformation, [mbOK], 0);
+      MessageDlg('ã—ãŠã‚Šã¯10å€‹ã¾ã§ã—ã‹è¨­å®šã§ãã¾ã›ã‚“', mtInformation, [mbOK], 0);
     end;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.MoveViewToCursor;
   EditView.Paint;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@Ÿ‚Ì‚µ‚¨‚è or ’¼‘O‚Ì‚µ‚¨‚èƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹s’¼‘O‚Ü‚½‚Í’¼Œã‚Ì‚µ‚¨‚è‚ÉƒWƒƒƒ“ƒv
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€æ¬¡ã®ã—ãŠã‚Š or ç›´å‰ã®ã—ãŠã‚Šã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«è¡Œç›´å‰ã¾ãŸã¯ç›´å¾Œã®ã—ãŠã‚Šã«ã‚¸ãƒ£ãƒ³ãƒ—
 //*****************************************************************************
 procedure TMainModule.OnNextBookmarkClick(Sender: TObject);
 var
@@ -224,12 +249,12 @@ begin
   case (Sender as TAction).Name[1] of
   'N': //NextBookmark
     begin
-      //’¼Œã‚ÌBookMarkID‚ğæ“¾
+      //ç›´å¾Œã®BookMarkIDã‚’å–å¾—
       BookMarkID := GetNextBookmarkID(+1);
     end;
   'P': //PrevBookmark
     begin
-      //’¼‘O‚ÌBookMarkID‚ğæ“¾
+      //ç›´å‰ã®BookMarkIDã‚’å–å¾—
       BookMarkID := GetNextBookmarkID(-1);
     end;
   else Exit;
@@ -240,155 +265,33 @@ begin
     EditView.BookmarkGoto(BookMarkID);
     EditView.MoveViewToCursor;
 
-    //Ä•`‰æ
+    //å†æç”»
     EditView.Paint;
   end;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ŒŸõƒ{ƒ^ƒ“ƒNƒŠƒbƒN
-//[ ŠT  —v ]@ŒŸõƒtƒH[ƒ€‚ğ•\¦‚·‚é
-//*****************************************************************************
-procedure TMainModule.OnFindFormClick(Sender: TObject);
-var
-  SearchResult: Boolean;
-begin
-  if not CheckEditView() then Exit;
-
-  FindDlg.FindText := GetCursorWord();
-  if FindDlg.ShowModal() = mrCancel then Exit;
-//  FSearchText := WideStringToUtf8(FindDlg.FindText);
-  FSearchText := FindDlg.FindText;
-
-  with EditView.Position.SearchOptions do
-  begin
-    CaseSensitive     := FindDlg.chkCase.Checked;
-    RegularExpression := FindDlg.chkRegEx.Checked;
-    WordBoundary      := FindDlg.chkWord.Checked;
-    SearchText        := FSearchText;
-    WholeFile         := True;
-    FromCursor        := True;
-    Direction := sdForward;
-  end;
-
-  SearchResult := EditView.Position.SearchAgain();
-  if SearchResult = False then
-  begin
-    EditView.Position.SearchOptions.Direction := sdBackward;
-    SearchResult := EditView.Position.SearchAgain();
-    if SearchResult = False then
-    begin
-      MessageDlg('Œ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½', mtInformation, [mbOK], 0);
-      Exit;
-    end;
-  end;
-
-  //Ä•`‰æ
-  EditView.MoveViewToCursor;
-  EditView.Paint;
-end;
-
-//*****************************************************************************
-//[ƒCƒxƒ“ƒg]@Œã•ûŒŸõ or ‘O•ûŒŸõƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹s’¼‘O‚Ü‚½‚Í’¼Œã‚ÌŒŸõ•¶š‚ÉƒWƒƒƒ“ƒv
-//*****************************************************************************
-procedure TMainModule.OnNextFindClick(Sender: TObject);
-var
-  SearchResult: Boolean;
-  TopRow, LeftCol: Integer;
-begin
-  if not CheckEditView() then Exit;
-
-//  ƒoƒO‚Á‚Û‚¢‚Ì‚Åg‚¦‚È‚©‚Á‚½
-//  SearchText := EditView.Position.SearchOptions.SearchText;
-
-  if FSearchText = '' then Exit;
-
-  with EditView.Position.SearchOptions do
-  begin
-    CaseSensitive     := FindDlg.chkCase.Checked;
-    RegularExpression := FindDlg.chkRegEx.Checked;
-    WordBoundary      := FindDlg.chkWord.Checked;
-    SearchText        := FSearchText;
-    WholeFile         := True;
-    FromCursor        := True;
-  end;
-
-  //‰æ–Êó‘Ô‚Ì•Û‘¶
-  TopRow  := EditView.TopRow;
-  LeftCol := EditView.LeftColumn;
-  EditView.Block.Save;
-  EditView.Position.Save;
-
-  case (Sender as TAction).Name[1] of
-  'N': //NextFind
-    begin
-      EditView.Position.MoveRelative(0, 1);
-      EditView.Position.SearchOptions.Direction := sdForward;
-    end;
-  'P': //PrevFind
-    begin
-      EditView.Position.MoveRelative(0,-1);
-      EditView.Position.SearchOptions.Direction := sdBackward;
-    end;
-  end;
-
-  SearchResult := EditView.Position.SearchAgain();
-  if SearchResult = False then
-  begin
-    //Ü‚è•Ô‚µ‚ÄŒŸõ
-    if EditView.Position.SearchOptions.Direction = sdForward then
-        EditView.Position.Move(1, 1)
-    else
-        EditView.Position.MoveEOF;
-
-    SearchResult := EditView.Position.SearchAgain();
-    if SearchResult = False then
-    begin
-      //‰æ–Êó‘Ô‚Ì•œŒ³
-      EditView.Position.Restore;
-      EditView.Block.Restore;
-      EditView.SetTopLeft(TopRow, LeftCol);
-      MessageDlg('Œ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½', mtInformation, [mbOK], 0);
-      Exit;
-    end
-    else
-    begin
-      //Ä•`‰æ
-      EditView.MoveViewToCursor;
-      EditView.Paint;
-      MessageDlg('Ü‚è•Ô‚µ‚Ü‚µ‚½', mtInformation, [mbOK], 0);
-      Exit;
-    end;
-  end;
-
-  //Ä•`‰æ
-  EditView.MoveViewToCursor;
-  EditView.Paint;
-end;
-
-//*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒCƒ“ƒfƒ“ƒg or ƒCƒ“ƒfƒ“ƒg‰ğœƒNƒŠƒbƒN
-//[ ŠT  —v ]@‘I‘ğs‚ğš‰º‚°‚Ü‚½‚Íšã‚°
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆ or ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆè§£é™¤ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€é¸æŠè¡Œã‚’å­—ä¸‹ã’ã¾ãŸã¯å­—ä¸Šã’
 //*****************************************************************************
 procedure TMainModule.OnIndentClick(Sender: TObject);
 begin
   if not CheckEditView() then Exit;
 
-  case (Sender as TComponent).Name[1] of
+  case (Sender as TAction).Name[1] of
   'I':Indent(+1);
   'O':Indent(-1);
   else Exit;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.Paint;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒCƒ“ƒfƒ“ƒg or ƒCƒ“ƒfƒ“ƒg‰ğœ
-//[ ˆø  ” ]@+1:ƒCƒ“ƒfƒ“ƒgA-1:ƒCƒ“ƒfƒ“ƒg‰ğœ
-//[ ŠT  —v ]@‘I‘ğs‚ğš‰º‚°‚Ü‚½‚Íšã‚°
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆ or ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆè§£é™¤
+//[ å¼•  æ•° ]ã€€+1:ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã€-1:ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆè§£é™¤
+//[ æ¦‚  è¦ ]ã€€é¸æŠè¡Œã‚’å­—ä¸‹ã’ã¾ãŸã¯å­—ä¸Šã’
 //*****************************************************************************
 procedure TMainModule.Indent(Sign: Integer);
 var
@@ -396,26 +299,26 @@ var
   StartingRow, EndingRow: Integer;
   MinusRow: Integer;
 begin
-  //ƒuƒƒbƒN‘I‘ğ‚ÅƒJ[ƒ\ƒ‹‚ªs“ª‚È‚ç‚»‚Ìs‚Í‘ÎÛŠO‚É‚·‚é
+  //ãƒ–ãƒ­ãƒƒã‚¯é¸æŠã§ã‚«ãƒ¼ã‚½ãƒ«ãŒè¡Œé ­ãªã‚‰ãã®è¡Œã¯å¯¾è±¡å¤–ã«ã™ã‚‹
   if (EditView.Block.Style <> btLine) and
      (EditView.Block.Size <> 0) and
      (EditView.Block.EndingColumn = 1) then MinusRow := 1
                                        else MinusRow := 0;
-  //‘I‘ğ‚ğs‘I‘ğ‚ÉØ‚è‘Ö‚¦
+  //é¸æŠã‚’è¡Œé¸æŠã«åˆ‡ã‚Šæ›¿ãˆ
   EditView.Block.Style := btLine;
   StartingRow  := EditView.Block.StartingRow;
   EndingRow    := EditView.Block.EndingRow - MinusRow;
 
   SelectRows(StartingRow, EndingRow);
 
-  //ƒCƒ“ƒfƒ“ƒg‚ğÀs
+  //ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã‚’å®Ÿè¡Œ
   Indent := EditView.Buffer.EditOptions.BlockIndent;
   EditView.Block.Indent(Indent * Sign);
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒRƒƒ“ƒg‰» or ƒRƒƒ“ƒg‰ğœƒNƒŠƒbƒN
-//[ ŠT  —v ]@‘I‘ğs‚ğƒRƒƒ“ƒg‰»‚Ü‚½‚Í‰ğœ
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚³ãƒ¡ãƒ³ãƒˆåŒ– or ã‚³ãƒ¡ãƒ³ãƒˆè§£é™¤ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€é¸æŠè¡Œã‚’ã‚³ãƒ¡ãƒ³ãƒˆåŒ–ã¾ãŸã¯è§£é™¤
 //*****************************************************************************
 procedure TMainModule.OnCommentClick(Sender: TObject);
 var
@@ -425,12 +328,12 @@ var
 begin
   if not CheckEditView() then Exit;
 
-  //ƒuƒƒbƒN‘I‘ğ‚ÅƒJ[ƒ\ƒ‹‚ªs“ª‚È‚ç‚»‚Ìs‚Í‘ÎÛŠO‚É‚·‚é
+  //ãƒ–ãƒ­ãƒƒã‚¯é¸æŠã§ã‚«ãƒ¼ã‚½ãƒ«ãŒè¡Œé ­ãªã‚‰ãã®è¡Œã¯å¯¾è±¡å¤–ã«ã™ã‚‹
   if (EditView.Block.Style <> btLine) and
      (EditView.Block.Size <> 0) and
      (EditView.Block.EndingColumn = 1) then MinusRow := 1
                                        else MinusRow := 0;
-  //‘I‘ğ‚ğs‘I‘ğ‚ÉØ‚è‘Ö‚¦
+  //é¸æŠã‚’è¡Œé¸æŠã«åˆ‡ã‚Šæ›¿ãˆ
   EditView.Block.Style := btLine;
   StartingRow  := EditView.Block.StartingRow;
   EndingRow    := EditView.Block.EndingRow - MinusRow;
@@ -438,7 +341,7 @@ begin
   for i := StartingRow to EndingRow do
   begin
     EditView.Position.Move(i, 1);
-    case (Sender as TComponent).Name[1] of
+    case (Sender as TAction).Name[1] of
     'C': //Comment
       begin
         EditView.Position.InsertText('//');
@@ -451,16 +354,16 @@ begin
     end;
   end;
 
-  //ƒRƒƒ“ƒgs‚ğ‘I‘ğ
+  //ã‚³ãƒ¡ãƒ³ãƒˆè¡Œã‚’é¸æŠ
   SelectRows(StartingRow, EndingRow);
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.Paint;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒƒ\ƒbƒhˆê——ƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒƒ\ƒbƒhˆê——ƒtƒH[ƒ€‚ğ•\¦‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ¡ã‚½ãƒƒãƒ‰ä¸€è¦§ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€ãƒ¡ã‚½ãƒƒãƒ‰ä¸€è¦§ãƒ•ã‚©ãƒ¼ãƒ ã‚’è¡¨ç¤ºã™ã‚‹
 //*****************************************************************************
 procedure TMainModule.OnShowMethodFormClick(Sender: TObject);
 begin
@@ -470,8 +373,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ªƒAƒCƒhƒ‹‚Ì
-//[ ŠT  —v ]@ŠeToolButton‚ÌEnabled‚ğİ’è‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãŒã‚¢ã‚¤ãƒ‰ãƒ«ã®æ™‚
+//[ æ¦‚  è¦ ]ã€€å„ToolButtonã®Enabledã‚’è¨­å®šã™ã‚‹
 //*****************************************************************************
 procedure TMainModule.ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
 var
@@ -482,9 +385,6 @@ begin
     SetActionEnabled('SetBookmark' , False);
     SetActionEnabled('NextBookmark', False);
     SetActionEnabled('PrevBookmark', False);
-    SetActionEnabled('FindForm'    , False);
-    SetActionEnabled('NextFind'    , False);
-    SetActionEnabled('PrevFind'    , False);
     SetActionEnabled('Indent'      , False);
     SetActionEnabled('Outdent'     , False);
     SetActionEnabled('Comment'     , False);
@@ -492,16 +392,11 @@ begin
     SetActionEnabled('ShowMethods' , False);
     Exit;
   end;
-
-  SetActionEnabled('NextFind', (FSearchText <> ''));
-  SetActionEnabled('PrevFind', (FSearchText <> ''));
-
   UsedBookMarkCount := GetUsedBookMarkCount();
   SetActionEnabled('NextBookmark', (UsedBookMarkCount > 0));
   SetActionEnabled('PrevBookmark', (UsedBookMarkCount > 0));
 
   SetActionEnabled('SetBookmark', True);
-  SetActionEnabled('FindForm'   , True);
   SetActionEnabled('Indent'     , True);
   SetActionEnabled('Outdent'    , True);
   SetActionEnabled('Comment'    , True);
@@ -510,15 +405,14 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ToolButton‚ÌEnabled‚ğİ’è‚·‚é
-//[ ˆø  ” ]@ƒ{ƒ^ƒ“–¼‚Æİ’è‚·‚éEnabled
+//[ æ¦‚  è¦ ]ã€€ToolButtonã®Enabledã‚’è¨­å®šã™ã‚‹
+//[ å¼•  æ•° ]ã€€ãƒœã‚¿ãƒ³åã¨è¨­å®šã™ã‚‹Enabled
 //*****************************************************************************
 procedure TMainModule.SetActionEnabled(ActionName: string; Enabled: Boolean);
   function GetActionFromName(ActionName: string): TAction;
   var
     EditToolBar: TToolBar;
     i: Integer;
-    ToolButton: TToolButton;
   begin
     Result := nil;
 
@@ -527,7 +421,6 @@ procedure TMainModule.SetActionEnabled(ActionName: string; Enabled: Boolean);
 
     for i := 0 to High(FActions) - 1 do
     begin
-      ToolButton := EditToolBar.Buttons[i];
       if FActions[i].Name = ActionName then
       begin
         Result := FActions[i];
@@ -546,74 +439,16 @@ end;
 //*****************************************************************************
 //initialization/finalization
 //*****************************************************************************
-{ TIDENotifier }
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg] ƒtƒ@ƒCƒ‹ƒI[ƒvƒ“‚âƒNƒ[ƒY
-//[ ŠT  —v ]
-//*****************************************************************************
-procedure TIDENotifier.FileNotification(NotifyCode: TOTAFileNotification;
-  const FileName: string; var Cancel: Boolean);
-var
-  ST: SYSTEMTIME;
-  Notify: string;
-begin
-//  case NotifyCode of
-//    ofnFileOpening:          Notify := 'ofnFileOpening';
-//    ofnFileOpened:           Notify := 'ofnFileOpened';
-//    ofnFileClosing:          Notify := 'ofnFileClosing';
-//    ofnDefaultDesktopLoad:   Notify := 'ofnDefaultDesktopLoad';
-//    ofnDefaultDesktopSave:   Notify := 'ofnDefaultDesktopSave';
-//    ofnProjectDesktopLoad:   Notify := 'ofnProjectDesktopLoad';
-//    ofnProjectDesktopSave:   Notify := 'ofnProjectDesktopSave';
-//    ofnPackageInstalled:     Notify := 'ofnPackageInstalled';
-//    ofnPackageUninstalled:   Notify := 'ofnPackageUninstalled';
-//    ofnActiveProjectChanged: Notify := 'ofnActiveProjectChanged';
-//    ofnProjectOpenedFromTemplate:
-//                             Notify := 'ofnProjectOpenedFromTemplate';
-//    else                     Notify := 'other';
-//  end;
-//  GetLocalTime(ST);
-//  Clipboard.AsText := Format('%2d:%2d:%2d.%3d %s %s',
-//   [ST.wHour, ST.wMinute, ST.wSecond, ST.wMilliseconds, Notify,FileName]);
-end;
-
-//*****************************************************************************
-//[ƒCƒxƒ“ƒg] BeforeƒRƒ“ƒpƒCƒ‹
-//[ ŠT  —v ] –{“–‚Í‚±‚±‚ÅÀ‘•‚µ‚½‚¢‚ªA‘z’èŠO‚Ìƒ^ƒCƒ~ƒ“ƒO‚ÅƒCƒxƒ“ƒg”­¶
-//*****************************************************************************
-procedure TIDENotifier.BeforeCompile(const Project: IOTAProject; var Cancel: Boolean);
-var
-  ST: SYSTEMTIME;
-begin
-//  GetLocalTime(ST);
-//  Clipboard.AsText := Format('BeforeCompile %2d:%2d:%2d.%3d',
-//   [ST.wHour, ST.wMinute, ST.wSecond, ST.wMilliseconds]);
-end;
-
-//*****************************************************************************
-//[ƒCƒxƒ“ƒg] AfterƒRƒ“ƒpƒCƒ‹
-//[ ŠT  —v ] –{“–‚Í‚±‚±‚ÅÀ‘•‚µ‚½‚¢‚ªA‘z’èŠO‚Ìƒ^ƒCƒ~ƒ“ƒO‚ÅƒCƒxƒ“ƒg”­¶
-//*****************************************************************************
-procedure TIDENotifier.AfterCompile(Succeeded: Boolean);
-var
-  ST: SYSTEMTIME;
-begin
-//  GetLocalTime(ST);
-//  Clipboard.AsText := Format('AfterCompile %2d:%2d:%2d.%3d',
-//   [ST.wHour, ST.wMinute, ST.wSecond, ST.wMilliseconds]);
-end;
-
-//*****************************************************************************
-//“o˜^
+//ç™»éŒ²
 //*****************************************************************************
 procedure Register;
 begin
-  IDENo1 := (BorlandIDEServices as IOTAServices).AddNotifier(TIDENotifier.Create);
   MainModule := TMainModule.Create(nil);
 end;
 
 //*****************************************************************************
-//íœ
+//å‰Šé™¤
 //*****************************************************************************
 procedure UnRegister;
 type
@@ -637,20 +472,19 @@ var
 
     fld.GetValue(Application.MainForm).ExtractRawData(@Toolbars);
 
-    // ƒ{ƒ^ƒ“‚Ìíœ
+    // ãƒœã‚¿ãƒ³ã®å‰Šé™¤
     for i := Low(Toolbars) to High(Toolbars) do
     begin
       if Toolbars[i] = AToolBar then
         for j := TToolBar(Toolbars[i]).ButtonCount-1 downto 0 do
         begin
           Button := TToolBar(Toolbars[i]).Buttons[j];
-          OutputDebugString(Pchar(Button.Name));
           Toolbars[i].Perform(CM_CONTROLCHANGE, WPARAM(Button), LPARAM(False));
           Button.Free;
         end;
     end;
 
-    // ’Ç‰Á‚µ‚½ƒc[ƒ‹ƒo[‚Ìœ‹
+    // è¿½åŠ ã—ãŸãƒ„ãƒ¼ãƒ«ãƒãƒ¼ã®é™¤å»
     for i := High(Toolbars) downto Low(Toolbars) do
       if Toolbars[i] = AToolBar then
         Delete(Toolbars, i, 1);
@@ -662,7 +496,6 @@ begin
   RemoveFromToolbars(Toolbar);
   Toolbar.Free;
 
-  (BorlandIDEServices as IOTAServices).RemoveNotifier(IDENo1);
   MainModule.Free;
 end;
 
@@ -673,4 +506,6 @@ initialization
 finalization
 	UnRegister;
 end.
+
+
 

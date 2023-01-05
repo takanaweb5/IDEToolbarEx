@@ -1,4 +1,4 @@
-unit MethodForm;
+ï»¿unit MethodForm;
 
 interface
 
@@ -45,7 +45,6 @@ type
     miBookMarkDel: TMenuItem;
     miGoBack: TMenuItem;
     N1: TMenuItem;
-//    procedure FormResize(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
     procedure miBookMarkSetClick(Sender: TObject);
@@ -62,15 +61,13 @@ type
     procedure ListBoxKeyPress(Sender: TObject; var Key: Char);
     procedure cmdOKClick(Sender: TObject);
   private
-//    SizeGrip: TSizeGrip;
-    FimplementationRow: Integer;//implementation‚Ì‚ ‚és
-    FinterfaceRow: Integer; //interface‚ÌŠJns
-    FInfoIndex: Integer;    //FMethodList‚Ì‹N“®‚ÌƒJ[ƒ\ƒ‹ˆÊ’u‚ÌƒCƒ“ƒfƒbƒNƒX
-    FTopRow: Integer;       //ƒtƒH[ƒ€‹N“®‚Ì‰æ–Ê‚Ìæ“ªs
-    FEditPos: TOTAEditPos;  //ƒtƒH[ƒ€‹N“®‚ÌƒJ[ƒ\ƒ‹ˆÊ’u
-    FText: string;          //•ÒW’†‚Ìƒtƒ@ƒCƒ‹‚Ì‚·‚×‚Ä‚Ìs
+    FimplementationRow: Integer;//implementationã®ã‚ã‚‹è¡Œ
+    FinterfaceRow: Integer; //interfaceã®é–‹å§‹è¡Œ
+    FInfoIndex: Integer;    //FMethodListã®èµ·å‹•æ™‚ã®ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+    FTopRow: Integer;       //ãƒ•ã‚©ãƒ¼ãƒ èµ·å‹•æ™‚ã®ç”»é¢ã®å…ˆé ­è¡Œ
+    FEditPos: TOTAEditPos;  //ãƒ•ã‚©ãƒ¼ãƒ èµ·å‹•æ™‚ã®ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®
+    FText: string;          //ç·¨é›†ä¸­ã®ãƒ•ã‚¡ã‚¤ãƒ«ã®ã™ã¹ã¦ã®è¡Œ
     FMethodList: array of TLineInfo;
-//    procedure WMMove(var Message: TWMMove); message WM_MOVE;
     procedure ListBoxClickBookMark(Index: Integer);
     procedure ListBoxClickList(Index: Integer);
     function SetMethodList(const Text: string): Integer;
@@ -112,7 +109,7 @@ const
 
 { TSizeGrip }
 //*****************************************************************************
-//[ ŠT  —v ]@ƒTƒCƒYƒOƒŠƒbƒv‚ğì¬‚·‚é
+//[ æ¦‚  è¦ ]ã€€ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹
 //*****************************************************************************
 constructor TSizeGrip.Create(AOwner: TComponent);
 begin
@@ -125,13 +122,13 @@ begin
   Top     := Parent.ClientHeight - Height;
   Anchors := [akRight, akBottom];
 
-  //ƒTƒuƒNƒ‰ƒX‰»
+  //ã‚µãƒ–ã‚¯ãƒ©ã‚¹åŒ–
   FOrgWndProc := Parent.WindowProc;
   Parent.WindowProc := SubClassProc;
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ƒfƒXƒgƒ‰ƒNƒ^
+//[ æ¦‚  è¦ ]ã€€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 //*****************************************************************************
 destructor TSizeGrip.Destroy;
 begin
@@ -141,9 +138,9 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ƒtƒH[ƒ€‚ÌƒTƒuƒNƒ‰ƒX‰»
-// ƒtƒH[ƒ€ˆÚ“®AƒTƒCƒYƒOƒŠƒbƒv‚ğŠmÀ‚ÉÄ•`‰æ‚³‚¹‚é@
-// ƒtƒH[ƒ€‚ÌÅ‘å‰»AƒTƒCƒYƒOƒŠƒbƒv‚ğ•\¦‚³‚¹‚È‚¢@
+//[ æ¦‚  è¦ ]ã€€ãƒ•ã‚©ãƒ¼ãƒ ã®ã‚µãƒ–ã‚¯ãƒ©ã‚¹åŒ–
+// ãƒ•ã‚©ãƒ¼ãƒ ç§»å‹•æ™‚ã€ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã‚’ç¢ºå®Ÿã«å†æç”»ã•ã›ã‚‹ã€€
+// ãƒ•ã‚©ãƒ¼ãƒ ã®æœ€å¤§åŒ–æ™‚ã€ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã‚’è¡¨ç¤ºã•ã›ãªã„ã€€
 //*****************************************************************************
 procedure TSizeGrip.SubClassProc(var Message: TMessage);
 begin
@@ -155,7 +152,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒTƒCƒYƒOƒŠƒbƒv‚Ì•`‰æˆ—
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã®æç”»å‡¦ç†
 //*****************************************************************************
 procedure TSizeGrip.Paint();
 begin
@@ -166,8 +163,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒTƒCƒYƒOƒŠƒbƒv‚ÌMouseDown
-//[ ŠT  —v ]@ƒTƒCƒY‚Ì•ÏX
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã®MouseDownæ™‚
+//[ æ¦‚  è¦ ]ã€€ã‚µã‚¤ã‚ºã®å¤‰æ›´
 //*****************************************************************************
 procedure TSizeGrip.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
@@ -182,8 +179,8 @@ end;
 
 { TListBoxEx }
 //*****************************************************************************
-//[ƒRƒ“ƒXƒgƒ‰ƒNƒ^]@
-//[ ŠT  —v ]@TListBox‚ğTListBoxEx‚É•Ïg‚³‚¹‚é
+//[ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿]ã€€
+//[ æ¦‚  è¦ ]ã€€TListBoxã‚’TListBoxExã«å¤‰èº«ã•ã›ã‚‹
 //*****************************************************************************
 constructor TListBoxEx.CreateClone(Original: TListBox);
   procedure CopyEvents();
@@ -196,11 +193,11 @@ constructor TListBoxEx.CreateClone(Original: TListBox);
     PropList := nil;
     Count := GetPropList(Original, PropList);
     try
-      //ƒvƒƒpƒeƒB‚Ì”‚¾‚¯ƒ‹[ƒv
+      //ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—
       for i := 0 to Count - 1 do
       begin
         PropInfo := PropList[i]^;
-        //ƒvƒƒpƒeƒB‚ªƒCƒxƒ“ƒg‚Ì
+        //ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£ãŒã‚¤ãƒ™ãƒ³ãƒˆã®æ™‚
         if PropInfo.PropType^.Kind = tkMethod  then
         begin
           PropValue := GetMethodProp(Original, PropInfo.Name);
@@ -219,11 +216,11 @@ begin
   MemStream := TMemoryStream.Create;
   try
     MemStream.WriteComponent(Original);
-    Original.Name := ''; //‚±‚ê‚ª‚È‚¢‚Æd•¡—áŠO‚ª”­¶
+    Original.Name := ''; //ã“ã‚ŒãŒãªã„ã¨é‡è¤‡ä¾‹å¤–ãŒç™ºç”Ÿ
     MemStream.Position := 0;
-    MemStream.ReadComponent(Self);  //ƒCƒxƒ“ƒg‚ÍƒRƒs[‚³‚ê‚È‚¢
+    MemStream.ReadComponent(Self);  //ã‚¤ãƒ™ãƒ³ãƒˆã¯ã‚³ãƒ”ãƒ¼ã•ã‚Œãªã„
 
-    //ƒCƒxƒ“ƒg‚ÌƒRƒs[
+    //ã‚¤ãƒ™ãƒ³ãƒˆã®ã‚³ãƒ”ãƒ¼
     CopyEvents();
 
 //    Self.OnDrawItem  := Original.OnDrawItem;
@@ -240,7 +237,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ] ƒŠƒXƒgƒ{ƒbƒNƒX‚Ì‘I‘ğs‚ÌƒtƒH[ƒJƒX‚ÌlŠp‚ğ•`‰æ‚³‚¹‚È‚¢@
+//[ æ¦‚  è¦ ] ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã®é¸æŠè¡Œã®ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã®å››è§’ã‚’æç”»ã•ã›ãªã„ã€€
 //*****************************************************************************
 procedure TListBoxEx.CNDrawItem(var Message: TWMDrawItem);
 var
@@ -266,8 +263,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒŠƒXƒgƒ{ƒbƒNƒXƒ}ƒEƒXƒzƒC[ƒ‹
-//[ ŠT  —v ]@ƒŠƒXƒgƒ{ƒbƒNƒX‚ğ‹C‚¿‚æ‚­ƒXƒNƒ[ƒ‹‚³‚¹‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ãƒã‚¦ã‚¹ãƒ›ã‚¤ãƒ¼ãƒ«æ™‚
+//[ æ¦‚  è¦ ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã‚’æ°—æŒã¡ã‚ˆãã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã•ã›ã‚‹
 //*****************************************************************************
 procedure TListBoxEx.WMMouseWheel(var Message: TWMMouseWheel);
 begin
@@ -285,7 +282,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ƒ\[ƒg—p‚Ìƒ†[ƒU’è‹`ŠÖ”
+//[ æ¦‚  è¦ ]ã€€ã‚½ãƒ¼ãƒˆç”¨ã®ãƒ¦ãƒ¼ã‚¶å®šç¾©é–¢æ•°
 //*****************************************************************************
 function StringListCompareStrings(List: TStringList; Index1, Index2: Integer): Integer;
 var
@@ -294,27 +291,27 @@ begin
   Info1 := MethodListForm.FMethodList[Integer(List.Objects[Index1])];
   Info2 := MethodListForm.FMethodList[Integer(List.Objects[Index2])];
 
-  //ƒNƒ‰ƒX–¼‚Åƒ\[ƒg
+  //ã‚¯ãƒ©ã‚¹åã§ã‚½ãƒ¼ãƒˆ
   Result := AnsiCompareText(Info1.ClassName, Info2.ClassName);
   if Result <> 0 then Exit;
 
-  //ƒƒ\ƒbƒh–¼‚Åƒ\[ƒg
+  //ãƒ¡ã‚½ãƒƒãƒ‰åã§ã‚½ãƒ¼ãƒˆ
   Result := AnsiCompareText(Info1.MethodName, Info2.MethodName);
   if Result <> 0 then Exit;
 
-  //s”Ô†‚Åƒ\[ƒg
+  //è¡Œç•ªå·ã§ã‚½ãƒ¼ãƒˆ
   Result := Info1.LineNo - Info2.LineNo;
 end;
 
 { TMethodListForm }
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ªƒAƒCƒhƒ‹‚Ì
-//[ ŠT  —v ]@ŠeƒRƒ“ƒgƒ[ƒ‹‚ÌEnabled‚ğİ’è‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãŒã‚¢ã‚¤ãƒ‰ãƒ«ã®æ™‚
+//[ æ¦‚  è¦ ]ã€€å„ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®Enabledã‚’è¨­å®šã™ã‚‹
 //*****************************************************************************
 procedure TMethodListForm.ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
 begin
 try
-  //“–ƒtƒH[ƒ€ˆÈŠO‚ÌApplicationEventsIdle‚ğÀs‚³‚¹‚È‚¢
+  //å½“ãƒ•ã‚©ãƒ¼ãƒ ä»¥å¤–ã®ApplicationEventsIdleã‚’å®Ÿè¡Œã•ã›ãªã„
   ApplicationEvents.CancelDispatch;
 
   chkSort.Enabled := (ListBox.Items.Count > 1);
@@ -350,25 +347,25 @@ except end;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒtƒH[ƒ€ì¬
-//[ ŠT  —v ]@‰Šúˆ—
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ•ã‚©ãƒ¼ãƒ ä½œæˆæ™‚
+//[ æ¦‚  è¦ ]ã€€åˆæœŸå‡¦ç†
 //*****************************************************************************
 procedure TMethodListForm.FormCreate(Sender: TObject);
 begin
-  //ƒTƒCƒYƒOƒŠƒbƒv‚Ìì¬
+  //ã‚µã‚¤ã‚ºã‚°ãƒªãƒƒãƒ—ã®ä½œæˆ
   TSizeGrip.Create(Self);
 
-  //ƒŠƒXƒgƒ{ƒbƒNƒX‚ğ•Ïg‚³‚¹‚é
+  //ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã‚’å¤‰èº«ã•ã›ã‚‹
   ListBox := TListBoxEx.CreateClone(ListBox);
   ListBox.ItemHeight := ListBox.ItemHeight + 4;
 
-  //ƒtƒH[ƒ€‚ÌÅ¬•‚Ìİ’è
+  //ãƒ•ã‚©ãƒ¼ãƒ ã®æœ€å°å¹…ã®è¨­å®š
   Constraints.MinWidth := 420;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒtƒH[ƒ€•\¦
-//[ ŠT  —v ]@‰æ–Ê‚Ì‰Šúİ’è
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ•ã‚©ãƒ¼ãƒ è¡¨ç¤ºæ™‚
+//[ æ¦‚  è¦ ]ã€€ç”»é¢ã®åˆæœŸè¨­å®š
 //*****************************************************************************
 procedure TMethodListForm.FormShow(Sender: TObject);
   function GetLineIndex(LineNo: Integer): Integer;
@@ -377,7 +374,7 @@ procedure TMethodListForm.FormShow(Sender: TObject);
   begin
     Result := -1;
 
-    //LineNo‚ğŠÜ‚Şƒƒ\ƒbƒh‚ğŒŸõ
+    //LineNoã‚’å«ã‚€ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æ¤œç´¢
     for i := ListBox.Items.Count -1  downto  0 do
     begin
       if GetLineInfo(i).LineNo <= LineNo then
@@ -392,20 +389,20 @@ var
 begin
   ListBox.Clear;
 
-  //ApplicationEventsIdle‚ğ—LŒø‚É‚·‚é
+  //ApplicationEventsIdleã‚’æœ‰åŠ¹ã«ã™ã‚‹
   ApplicationEvents.OnIdle := ApplicationEventsIdle;
   ApplicationEvents.Activate;
 
-  //‹N“®‚ÌƒJ[ƒ\ƒ‹ˆÊ’uî•ñ‚ğ•Û‘¶
+  //èµ·å‹•æ™‚ã®ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®æƒ…å ±ã‚’ä¿å­˜
   FTopRow  := EditView.TopRow;
   FEditPos := EditView.CursorPos;
 
-  //•ÒW’†‚Ìƒtƒ@ƒCƒ‹–¼‚ğƒtƒH[ƒ€‚Ìƒ^ƒCƒgƒ‹ƒo[‚É•\¦
-  Caption := 'ƒƒ\ƒbƒhˆê—— - ' + ExtractFileName(EditView.Buffer.FileName);
+  //ç·¨é›†ä¸­ã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒ•ã‚©ãƒ¼ãƒ ã®ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã«è¡¨ç¤º
+  Caption := 'ãƒ¡ã‚½ãƒƒãƒ‰ä¸€è¦§ - ' + ExtractFileName(EditView.Buffer.FileName);
 
   FText := GetAllText();
 
-  //ŠeƒRƒ“ƒgƒ[ƒ‹‚ÌEnabled‚Ìİ’è
+  //å„ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ã®Enabledã®è¨­å®š
   if SetMethodList(FText) = 0 then
   begin
     cmbCommand.Enabled    := False;
@@ -438,7 +435,7 @@ begin
   chkMethodName.OnClick := SetLstBox;
   cmbCommand.OnClick    := SetLstBox;
 
-  //ƒJ[ƒ\ƒ‹ˆÊ’u‚Ìƒƒ\ƒbƒh‚ğ‘I‘ğ
+  //ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚’é¸æŠ
   LineNo := EditView.Position.Row;
   if GetLineIndex(LineNo) <> -1 then
   begin
@@ -448,28 +445,28 @@ begin
   end
   else
   begin
-    //æ“ª‚ğ‘I‘ğ
+    //å…ˆé ­ã‚’é¸æŠ
     ListBox.ItemIndex := 0;
     FInfoIndex := -1;
   end;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒtƒH[ƒ€‚ğClose‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ•ã‚©ãƒ¼ãƒ ã‚’Closeã™ã‚‹æ™‚
 //*****************************************************************************
 procedure TMethodListForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   case ModalResult of
-  mrOk : ;//‰½‚à‚µ‚È‚¢
+  mrOk : ;//ä½•ã‚‚ã—ãªã„
 //   begin
-//    //‘I‘ğ‚³‚ê‚½ƒƒ\ƒbƒh‚ÌƒƒWƒbƒNŠJnˆÊ’u‚ÖƒJ[ƒ\ƒ‹‚ğˆÚ“®
+//    //é¸æŠã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ã®ãƒ­ã‚¸ãƒƒã‚¯é–‹å§‹ä½ç½®ã¸ã‚«ãƒ¼ã‚½ãƒ«ã‚’ç§»å‹•
 //    LineNo := GetLineInfo(ListBox.ItemIndex).LineNo;
 //    LineNo := GetMethodLineInfo(LineNo, FText).LogicStart;
 //    EditView.Position.Move(LineNo, 1);
 //   end;
   mrCancel :
    begin
-    //ƒtƒH[ƒ€‹N“®‚ÌƒJ[ƒ\ƒ‹ˆÊ’u‚ğ•\¦
+    //ãƒ•ã‚©ãƒ¼ãƒ èµ·å‹•æ™‚ã®ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã‚’è¡¨ç¤º
     EditView.SetTopLeft(FTopRow, 1);
     EditView.SetCursorPos(FEditPos);
    end;
@@ -477,18 +474,18 @@ begin
 
   EditView.Paint;
 
-  //ƒEƒBƒ“ƒhƒE‚ÌƒTƒCƒY‚ğŒ³‚É–ß‚·
+  //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ã‚µã‚¤ã‚ºã‚’å…ƒã«æˆ»ã™
 //  ShowWindow(Handle, SW_HIDE);
   Self.WindowState := wsNormal;
 
   FMethodList := nil;
 
-  //ApplicationEventsIdle‚ğ–³Œø‚É‚·‚é
+  //ApplicationEventsIdleã‚’ç„¡åŠ¹ã«ã™ã‚‹
   ApplicationEvents.OnIdle := nil;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒtƒH[ƒ€‚ğClose‚·‚é‘O‚ÉŠm”F‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ•ã‚©ãƒ¼ãƒ ã‚’Closeã™ã‚‹å‰ã«ç¢ºèªã™ã‚‹
 //*****************************************************************************
 procedure TMethodListForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
@@ -496,7 +493,7 @@ begin
 
   if (FTopRow <> EditView.TopRow) or (FEditPos.Line <> EditView.CursorPos.Line) then
   begin
-    case MessageDlg('Œ³‚ÌˆÊ’u‚É–ß‚µ‚Ü‚·‚©H', mtInformation,
+    case MessageDlg('å…ƒã®ä½ç½®ã«æˆ»ã—ã¾ã™ã‹ï¼Ÿ', mtInformation,
                                       [mbYes, mbNo, mbCancel], 0) of
     mrYes   : ModalResult := mrCancel;
     mrNo    : ModalResult := mrOk;
@@ -506,8 +503,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@KeyDown
-//[ ŠT  —v ] ESC‚ÅƒtƒH[ƒ€‚ğ•Â‚¶‚é@
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€KeyDownæ™‚
+//[ æ¦‚  è¦ ] ESCã§ãƒ•ã‚©ãƒ¼ãƒ ã‚’é–‰ã˜ã‚‹ã€€
 //*****************************************************************************
 procedure TMethodListForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -515,7 +512,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@•Â‚¶‚éƒ{ƒ^ƒ“ƒNƒŠƒbƒN
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€é–‰ã˜ã‚‹ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚
 //*****************************************************************************
 procedure TMethodListForm.cmdOKClick(Sender: TObject);
 begin
@@ -523,10 +520,10 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒŠƒXƒgƒ{ƒbƒNƒXKeyPress
-//[ ŠT  —v ]@‡@ƒXƒy[ƒXƒL[‚ÅƒuƒbƒNƒ}[ƒN‚Ìİ’è/‰ğœ‚ğs‚¤
-//            @¦KeyDown‚Å‚ÍƒfƒtƒHƒ‹ƒg‚Ì“®ì‚ğ—}§‚Å‚«‚È‚¢‚Ì‚ÅKeyPress‚ğg—p
-//            ‡AƒAƒ‹ƒtƒ@ƒxƒbƒg‚ÌƒL[‚ÅAŠY“–‚·‚éƒƒ\ƒbƒh‚ğŒŸõ
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹KeyPressæ™‚
+//[ æ¦‚  è¦ ]ã€€â‘ ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ã§ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã®è¨­å®š/è§£é™¤ã‚’è¡Œã†
+//            ã€€â€»KeyDownã§ã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å‹•ä½œã‚’æŠ‘åˆ¶ã§ããªã„ã®ã§KeyPressã‚’ä½¿ç”¨
+//            â‘¡ã‚¢ãƒ«ãƒ•ã‚¡ãƒ™ãƒƒãƒˆã®ã‚­ãƒ¼ã§ã€è©²å½“ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æ¤œç´¢
 //*****************************************************************************
 procedure TMethodListForm.ListBoxKeyPress(Sender: TObject; var Key: Char);
   function SerchMethod(ClassName: string; StartIndex: Integer): Integer;
@@ -539,7 +536,7 @@ procedure TMethodListForm.ListBoxKeyPress(Sender: TObject; var Key: Char);
       k := Integer(ListBox.Items.Objects[i]);
       if AnsiSameText(FMethodList[k].ClassName, ClassName) then
       begin
-        //ƒƒ\ƒbƒh‚Ì1•¶š–Ú‚ğÆ‡(MethodName=''‚Ìê‡‚à—áŠO‚È‚µ)
+        //ãƒ¡ã‚½ãƒƒãƒ‰ã®1æ–‡å­—ç›®ã‚’ç…§åˆ(MethodName=''ã®å ´åˆã‚‚ä¾‹å¤–ãªã—)
         if AnsiSameText(Key, LeftStr(FMethodList[k].MethodName, 1)) then
         begin
           Result := i;
@@ -553,20 +550,20 @@ var
   j, k: Integer;
   blnSerch: Boolean;
 begin
-  //ƒŠƒXƒgƒ{ƒbƒNƒX‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚È‚¢‚Æ‘ÎÛŠO
+  //ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ãŒé¸æŠã•ã‚Œã¦ã„ãªã„ã¨å¯¾è±¡å¤–
   Index := ListBox.ItemIndex;
   if Index < 0 then Exit;
 
-  //ƒXƒy[ƒXƒL[‚ÅƒuƒbƒNƒ}[ƒN‚Ìİ’è/‰ğœ‚ğs‚¤
+  //ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ã§ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã®è¨­å®š/è§£é™¤ã‚’è¡Œã†
   if Key = ' ' then
   begin
     ListBoxClickBookMark(Index);
-    //ƒfƒtƒHƒ‹ƒg‚Ì‘€ì‚ğ—}§‚·‚é
+    //ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®æ“ä½œã‚’æŠ‘åˆ¶ã™ã‚‹
     Key := Chr(0);
     Exit;
   end;
 
-  //ƒAƒ‹ƒtƒ@ƒxƒbƒg‚ÌƒL[‚ÅAŠY“–‚·‚éƒƒ\ƒbƒh‚ğŒŸõ
+  //ã‚¢ãƒ«ãƒ•ã‚¡ãƒ™ãƒƒãƒˆã®ã‚­ãƒ¼ã§ã€è©²å½“ã™ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’æ¤œç´¢
   case Key of
    'A'..'Z','a'..'z','0'..'9','_':
     begin
@@ -574,17 +571,17 @@ begin
 
       blnSerch := (FMethodList[k].Command <> C_CLASSDEFINE);
       if blnSerch = False then
-        if (cmbCommand.Text = '‚·‚×‚Ä') and (chkSort.Checked = True) then
+        if (cmbCommand.Text = 'ã™ã¹ã¦') and (chkSort.Checked = True) then
           blnSerch := True;
         if chkClassName.Checked then
           blnSerch := True;
 
       if blnSerch then
       begin
-        //ŠY“–‚·‚éƒNƒ‰ƒX‚ÌKey‚Ån‚Ü‚éƒƒ\ƒbƒh‚ğ‘I‘ğ‚³‚ê‚½IndexˆÈ~‚ÅŒŸõ
+        //è©²å½“ã™ã‚‹ã‚¯ãƒ©ã‚¹ã®Keyã§å§‹ã¾ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰ã‚’é¸æŠã•ã‚ŒãŸIndexä»¥é™ã§æ¤œç´¢
         j := SerchMethod(FMethodList[k].ClassName, Index + 1);
         if j < 0 then
-          //‘I‘ğ‚³‚ê‚½IndexˆÈ~‚ÉŒ©‚Â‚©‚ç‚È‚¯‚ê‚ÎÅ‰‚©‚çŒŸõ
+          //é¸æŠã•ã‚ŒãŸIndexä»¥é™ã«è¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã°æœ€åˆã‹ã‚‰æ¤œç´¢
           j := SerchMethod(FMethodList[k].ClassName, 0);
 
         if j >= 0 then
@@ -594,15 +591,15 @@ begin
         end;
       end;
 
-      //ƒfƒtƒHƒ‹ƒg‚Ì‘€ì‚ğ—}§‚·‚é
+      //ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®æ“ä½œã‚’æŠ‘åˆ¶ã™ã‚‹
       Key := Chr(0);
     end;
   end;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg] ƒŠƒXƒgƒ{ƒbƒNƒXKeyDown
-//[ ŠT  —v ] DELETE‚ÅƒuƒbƒNƒ}[ƒN‚ğíœ@
+//[ã‚¤ãƒ™ãƒ³ãƒˆ] ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹KeyDownæ™‚
+//[ æ¦‚  è¦ ] DELETEã§ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚’å‰Šé™¤ã€€
 //*****************************************************************************
 //procedure TMethodListForm.ListBoxKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 //begin
@@ -612,8 +609,8 @@ end;
 //end;
 
 //*****************************************************************************
-//[ ŠT  —v ] ƒŠƒXƒgƒ{ƒbƒNƒX‚Å‘I‘ğ‚³‚ê‚½ƒƒ\ƒbƒh“à‚ÌƒuƒbƒNƒ}[ƒN‚ğ‚·‚×‚Äíœ‚·‚é
-//[ ˆø  ” ] ƒŠƒXƒgƒ{ƒbƒNƒX‚Å‘I‘ğ‚³‚ê‚Ä‚¢‚éIndex
+//[ æ¦‚  è¦ ] ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã§é¸æŠã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰å†…ã®ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚’ã™ã¹ã¦å‰Šé™¤ã™ã‚‹
+//[ å¼•  æ•° ] ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã§é¸æŠã•ã‚Œã¦ã„ã‚‹Index
 //*****************************************************************************
 procedure TMethodListForm.ClearBookmark(Index: Integer);
 var
@@ -624,27 +621,27 @@ begin
   if FMethodList[k].BookMark = [] then Exit;
   FMethodList[k].BookMark := [];
 
-  //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+  //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
   for i := 0 to 9 do
   begin
     BMLineNo := EditView.BookmarkPos[i].Line;
     if BMLineNo = 0 then Continue;
     if GetMethodLineInfo(BMLineNo, FText).StartRow = FMethodList[k].LineNo then
     begin
-      //Bookmark‚Ì‰ğœ
+      //Bookmarkã®è§£é™¤
       EditView.BookmarkGoto(i);
       EditView.BookmarkToggle(i);
     end;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.Paint;
   ListBox.Repaint;
 end;
 
 
 //*****************************************************************************
-//[ ŠT  —v ] ƒŠƒXƒgƒ{ƒbƒNƒX‚Ì€–Ú‚Ì•`‰æ‚ğ“Æ©‚És‚¤@
+//[ æ¦‚  è¦ ] ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã®é …ç›®ã®æç”»ã‚’ç‹¬è‡ªã«è¡Œã†ã€€
 //*****************************************************************************
 procedure TMethodListForm.ListBoxDrawItem(Control: TWinControl; Index: Integer; ARect: TRect; State: TOwnerDrawState);
   procedure DrawDotLine(Canvas: TCanvas; StartX, EndX: Integer);
@@ -664,10 +661,10 @@ begin
   with ListBox do
   begin
     //*************************************
-    //ƒuƒbƒNƒ}[ƒNƒAƒCƒRƒ“ƒGƒŠƒA‚Ì•`‰æ
+    //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚¢ã‚¤ã‚³ãƒ³ã‚¨ãƒªã‚¢ã®æç”»
     //*************************************
     if Index = Items.Count - 1 then
-      //ÅŒã‚Ìs‚Ì‚ÍAc‚è‚Ì—Ìˆæ‚à‘ÎÛ
+      //æœ€å¾Œã®è¡Œã®æ™‚ã¯ã€æ®‹ã‚Šã®é ˜åŸŸã‚‚å¯¾è±¡
       R := Rect(0, ARect.Top, LEFTWIDTH, ClientRect.Bottom)
     else
       R := Rect(0, ARect.Top, LEFTWIDTH, ARect.Bottom);
@@ -677,34 +674,34 @@ begin
     Canvas.MoveTo(LEFTWIDTH, ARect.Top);
     Canvas.LineTo(LEFTWIDTH, R.Bottom);
 
-    //ƒJƒŒƒ“ƒgs‚ÍA!ƒ}[ƒN‚ğ‚Â‚¯‚é
+    //ã‚«ãƒ¬ãƒ³ãƒˆè¡Œã¯ã€Iãƒãƒ¼ã‚¯ã‚’ã¤ã‘ã‚‹
     if GetLineInfo(Index).Select then
     begin
       Canvas.Font.Color := clRed;
-      Canvas.TextOut(0, R.Top + 1, '!');
+      Canvas.TextOut(0, R.Top + 1, 'I');
     end;
 
-    //ƒuƒbƒNƒ}[ƒN‚ÌƒAƒCƒRƒ“‚ğ‚Â‚¯‚é
+    //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã®ã‚¢ã‚¤ã‚³ãƒ³ã‚’ã¤ã‘ã‚‹
     if bsOn in GetLineInfo(Index).BookMark then
       ImageList.Draw(Canvas,3, ARect.Top, 0)
     else if bsGray in GetLineInfo(Index).BookMark then
       ImageList.Draw(Canvas,3, ARect.Top, 1);
 
     //*************************************
-    //ã‹LˆÈŠO‚ÌƒGƒŠƒA‚Ì•`‰æ
+    //ä¸Šè¨˜ä»¥å¤–ã®ã‚¨ãƒªã‚¢ã®æç”»
     //*************************************
     R := Rect(ARect.Left + LEFTWIDTH + 1, ARect.Top, ARect.Right, ARect.Bottom);
 
     Canvas.Brush.Color := GetLineInfo(Index).Color;
 
-    if cmbCommand.Text = 'ƒNƒ‰ƒXéŒ¾' then
+    if cmbCommand.Text = 'ã‚¯ãƒ©ã‚¹å®£è¨€' then
         Canvas.Brush.Color := $FFDDFE
     else
       if (chkSort.Checked = False) and (chkClassName.Checked = False) and
          (GetLineInfo(Index).Command = C_CLASSDEFINE) then
         Canvas.Brush.Color := $FFDDFE;
 
-    //ƒtƒH[ƒJƒX‚Ì‚ ‚és‚ÌF‚ğ•ÏX‚·‚é
+    //ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã®ã‚ã‚‹è¡Œã®è‰²ã‚’å¤‰æ›´ã™ã‚‹
     if odSelected in State then
       Canvas.Brush.Color := Canvas.Brush.Color - $0C0C0C;
 
@@ -712,17 +709,17 @@ begin
     Canvas.Font.Color := clBlack;
     Canvas.TextOut(R.Left + 6, R.Top + 1, Items[Index]);
 
-    //ƒtƒH[ƒJƒX‚Ì“_ü˜g
+    //ãƒ•ã‚©ãƒ¼ã‚«ã‚¹ã®ç‚¹ç·šæ 
     if odSelected in State then Canvas.DrawFocusRect(R);
 
-    //implementation•”‚ÌŠJn‘O‚É‰ºü‚ğˆø‚­
+    //implementationéƒ¨ã®é–‹å§‹å‰ã«ä¸‹ç·šã‚’å¼•ã
     if (chkSort.Checked = False) and (chkClassName.Checked = False) then
     begin
       if (Index > 0) and
          (GetLineInfo(Index - 1).LineNo < FimplementationRow) and
          (FimplementationRow < GetLineInfo(Index).LineNo) then
       begin
-        //‹É×‚Ì“_ü‚ğ•`‰æ
+        //æ¥µç´°ã®ç‚¹ç·šã‚’æç”»
         DrawDotLine(Canvas, LEFTWIDTH + 1, ARect.Right);
 //        Canvas.Pen.Color := clBlack;
 //        Canvas.MoveTo(LEFTWIDTH + 1, ARect.Top);
@@ -733,8 +730,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒŠƒXƒgƒ{ƒbƒNƒXƒNƒŠƒbƒN
-//[ ŠT  —v ]@‘I‘ğ‚³‚ê‚½ƒƒ\ƒbƒh‚ğ•\¦‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€é¸æŠã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¡¨ç¤ºã™ã‚‹
 //*****************************************************************************
 procedure TMethodListForm.ListBoxClick(Sender: TObject);
 begin
@@ -742,8 +739,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ƒŠƒXƒgƒ{ƒbƒN‚Ì‘I‘ğ‚³‚ê‚½ƒƒ\ƒbƒh‚ğ•\¦‚·‚é
-//[ ˆø  ” ]@ListBoxIndex
+//[ æ¦‚  è¦ ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã®é¸æŠã•ã‚ŒãŸãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¡¨ç¤ºã™ã‚‹
+//[ å¼•  æ•° ]ã€€ListBoxIndex
 //*****************************************************************************
 procedure TMethodListForm.JumpSelectMethod(Index: Integer);
 var
@@ -754,7 +751,7 @@ begin
 
   if GetLineInfo(Index).Command = C_CLASSDEFINE then
   begin
-    //Ä•`‰æ
+    //å†æç”»
     EditView.SetTopLeft(GetCommentStart(LineNo, FText), 1);
     EditView.Paint;
     EditView.Position.Move(LineNo, 1);
@@ -764,7 +761,7 @@ begin
     MethodLineInfo := GetMethodLineInfo(LineNo, FText);
     if MethodLineInfo.StartRow = 0 then Exit;
 
-    //Ä•`‰æ
+    //å†æç”»
     EditView.SetTopLeft(MethodLineInfo.CommentStart, 1);
     EditView.Paint;
     EditView.Position.Move(MethodLineInfo.LogicStart, 1);
@@ -772,7 +769,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒŠƒXƒgƒ{ƒbƒNƒXƒ_ƒuƒ‹ƒNƒŠƒbƒN
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯æ™‚
 //*****************************************************************************
 procedure TMethodListForm.ListBoxDblClick(Sender: TObject);
 begin
@@ -780,8 +777,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒŠƒXƒgƒ{ƒbƒNƒXƒ}ƒEƒXƒ_ƒEƒ“
-//[ ŠT  —v ]@ƒNƒŠƒbƒN‚³‚ê‚½—Ìˆæ‚Å§Œä‚ğ•Ï‚¦‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ãƒã‚¦ã‚¹ãƒ€ã‚¦ãƒ³æ™‚
+//[ æ¦‚  è¦ ]ã€€ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸé ˜åŸŸã§åˆ¶å¾¡ã‚’å¤‰ãˆã‚‹
 //*****************************************************************************
 procedure TMethodListForm.ListBoxMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
@@ -805,8 +802,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒuƒbƒNƒ}[ƒNƒAƒCƒRƒ“ƒGƒŠƒA‚ÌƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒuƒbƒNƒ}[ƒNƒAƒCƒRƒ“‚Ìİ’è
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚¢ã‚¤ã‚³ãƒ³ã‚¨ãƒªã‚¢ã®ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚¢ã‚¤ã‚³ãƒ³ã®è¨­å®š
 //*****************************************************************************
 procedure TMethodListForm.ListBoxClickBookMark(Index: Integer);
 var
@@ -818,14 +815,14 @@ begin
   k := Integer(ListBox.Items.Objects[Index]);
 
   if bsOn in GetLineInfo(Index).BookMark then
-    //‚·‚Å‚Éİ’è‚³‚ê‚Ä‚¢‚ê‚Î‰ğœ
+    //ã™ã§ã«è¨­å®šã•ã‚Œã¦ã„ã‚Œã°è§£é™¤
     Exclude(FMethodList[k].BookMark, bsOn)
   else
   begin
-    //–¢İ’è‚Å‚ ‚ê‚Îİ’è
+    //æœªè¨­å®šã§ã‚ã‚Œã°è¨­å®š
     if GetUnusedBookMarkID() >= 10 then
     begin
-      MessageDlg('‚µ‚¨‚è‚Í10ŒÂ‚Ü‚Å‚µ‚©İ’è‚Å‚«‚Ü‚¹‚ñ', mtInformation, [mbOK], 0);
+      MessageDlg('ã—ãŠã‚Šã¯10å€‹ã¾ã§ã—ã‹è¨­å®šã§ãã¾ã›ã‚“', mtInformation, [mbOK], 0);
       Exit
     end;
     Include(FMethodList[k].BookMark, bsOn);
@@ -842,14 +839,14 @@ begin
 
   if bsOn in GetLineInfo(Index).BookMark then
   begin
-    //‚µ‚¨‚è‚Ìİ’è
+    //ã—ãŠã‚Šã®è¨­å®š
     BookMarkID := GetUnusedBookMarkID();
     EditView.Position.Move(MethodLineInfo.StartRow, 1);
     EditView.BookmarkRecord(BookMarkID);
   end
   else
   begin
-    //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+    //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
     for i := 0 to 9 do
     begin
       BMLineNo := EditView.BookmarkPos[i].Line;
@@ -857,24 +854,24 @@ begin
       if (BMLineNo = MethodLineInfo.StartRow) or
          (BMLineNo = MethodLineInfo.LogicStart) then
       begin
-        //Bookmark‚Ì‰ğœ
+        //Bookmarkã®è§£é™¤
         EditView.BookmarkGoto(i);
         EditView.BookmarkToggle(i);
       end;
     end;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.Paint;
   ListBox.Repaint;
 
-  //ƒ_ƒuƒ‹ƒNƒŠƒbƒNƒCƒxƒ“ƒg‚ğ—}~
+  //ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆã‚’æŠ‘æ­¢
   ListBox.OnDblClick := nil;
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]@ƒuƒbƒNƒ}[ƒNƒAƒCƒRƒ“ƒGƒŠƒAˆÈŠO‚ÌƒNƒŠƒbƒN
-//[ ŠT  —v ]@ƒ_ƒuƒ‹ƒNƒŠƒbƒNƒCƒxƒ“ƒg‚ğ•œŠˆ
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]ã€€ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯ã‚¢ã‚¤ã‚³ãƒ³ã‚¨ãƒªã‚¢ä»¥å¤–ã®ã‚¯ãƒªãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ã‚¤ãƒ™ãƒ³ãƒˆã‚’å¾©æ´»
 //*****************************************************************************
 procedure TMethodListForm.ListBoxClickList(Index: Integer);
 begin
@@ -882,10 +879,10 @@ begin
 end;
 
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg]  ƒtƒH[ƒ€•\¦
-//          @ƒ\[ƒgƒNƒŠƒbƒN
-//          @ƒ`ƒFƒbƒNƒ{ƒbƒNƒXƒ`ƒFƒbƒN
-//[ ŠT  —v ]@FMethodList‚Ì“à—e‚©‚çƒŠƒXƒgƒ{ƒbƒNƒX‚ğİ’è‚·‚é
+//[ã‚¤ãƒ™ãƒ³ãƒˆ]  ãƒ•ã‚©ãƒ¼ãƒ è¡¨ç¤ºæ™‚
+//          ã€€ã‚½ãƒ¼ãƒˆã‚¯ãƒªãƒƒã‚¯æ™‚
+//          ã€€ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ãƒã‚§ãƒƒã‚¯æ™‚
+//[ æ¦‚  è¦ ]ã€€FMethodListã®å†…å®¹ã‹ã‚‰ãƒªã‚¹ãƒˆãƒœãƒƒã‚¯ã‚¹ã‚’è¨­å®šã™ã‚‹
 //*****************************************************************************
 procedure TMethodListForm.SetLstBox(Sender: TObject);
 var
@@ -898,7 +895,7 @@ var
 begin
   iColor := clWhite;
 
-  //‘I‘ğ‚³‚ê‚Ä‚¢‚és‚Ìî•ñ‚ğæ“¾‚·‚é
+  //é¸æŠã•ã‚Œã¦ã„ã‚‹è¡Œã®æƒ…å ±ã‚’å–å¾—ã™ã‚‹
   iLineNo := 0;
   if ListBox.ItemIndex >= 0 then
   begin
@@ -911,7 +908,7 @@ begin
     end;
   end;
 
-  //‘ÎÛ‚Ìs‚ğ‘I‘ğ‚·‚é
+  //å¯¾è±¡ã®è¡Œã‚’é¸æŠã™ã‚‹
   ST := TStringList.Create;
   try
     for i := 0 to Length(FMethodList) - 1 do
@@ -922,10 +919,10 @@ begin
           if AnsiSameText(FMethodList[i].ClassName,  strClassName) = False then
             Continue;
         if chkMethodName.Checked then Continue;
-        if (cmbCommand.Text <> '‚·‚×‚Ä') and (cmbCommand.Text <> 'ƒNƒ‰ƒXéŒ¾')  then
+        if (cmbCommand.Text <> 'ã™ã¹ã¦') and (cmbCommand.Text <> 'ã‚¯ãƒ©ã‚¹å®£è¨€')  then
           Continue;
 
-        if cmbCommand.Text = 'ƒNƒ‰ƒXéŒ¾' then
+        if cmbCommand.Text = 'ã‚¯ãƒ©ã‚¹å®£è¨€' then
           str := Format('%-18s = %s', [FMethodList[i].ClassName, FMethodList[i].Define])
         else
           if chkClassName.Checked or chkSort.Checked then
@@ -952,7 +949,7 @@ begin
       ST.AddObject(str, Pointer(i));
     end;
 
-    //ƒ\[ƒg‚ªƒ`ƒFƒbƒN‚³‚ê‚Ä‚¢‚ê‚Îƒ\[ƒg‚³‚¹‚é
+    //ã‚½ãƒ¼ãƒˆãŒãƒã‚§ãƒƒã‚¯ã•ã‚Œã¦ã„ã‚Œã°ã‚½ãƒ¼ãƒˆã•ã›ã‚‹
     if chkSort.Checked then ST.CustomSort(StringListCompareStrings);
 
     ListBox.Items.Assign(ST);
@@ -960,7 +957,7 @@ begin
     ST.Free;
   end;
 
-  //‘I‘ğ‚³‚ê‚Ä‚¢‚½s‚ğÄ‘I‘ğ‚³‚¹‚é
+  //é¸æŠã•ã‚Œã¦ã„ãŸè¡Œã‚’å†é¸æŠã•ã›ã‚‹
   if iLineNo <> 0 then
   begin
     for i := 0 to ListBox.Items.Count - 1 do
@@ -973,31 +970,31 @@ begin
     end;
   end;
 
-  //”wŒiF‚Ìî•ñ‚ğİ’è‚·‚é
+  //èƒŒæ™¯è‰²ã®æƒ…å ±ã‚’è¨­å®šã™ã‚‹
   ClearColor();
   SetColor(True);
 
-  //‘I‘ğs‚Ì”wŒiF‚ª‘I‘ğ‘O‚Æ•Ï‚í‚Á‚½‚ç‘I‘ğ‘O‚Æ“¯‚¶‚É‚È‚é‚æ‚¤‚É‚â‚è’¼‚µ
+  //é¸æŠè¡Œã®èƒŒæ™¯è‰²ãŒé¸æŠå‰ã¨å¤‰ã‚ã£ãŸã‚‰é¸æŠå‰ã¨åŒã˜ã«ãªã‚‹ã‚ˆã†ã«ã‚„ã‚Šç›´ã—
   if ListBox.ItemIndex >= 0 then
   begin
     if (iColor <> clWhite) and
        (iColor <> GetLineInfo(ListBox.ItemIndex).Color) then
     begin
-      //”wŒiF‚Ìî•ñ‚ğÄİ’è‚·‚é
+      //èƒŒæ™¯è‰²ã®æƒ…å ±ã‚’å†è¨­å®šã™ã‚‹
       SetColor(False);
     end;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   ListBox.Repaint;
   ListBox.SetFocus;
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@”wŒiF‚ğİ’è‚·‚é
-//[ ˆø  ” ]@Å‰‚ÌF‚ğ‚¢‚¸‚ê‚É‚·‚é‚©‚ÌƒgƒOƒ‹
-// ƒNƒ‰ƒX–¼‚ª‰Šú’l‚Ì‚Íu”’v
-// ƒNƒ‰ƒX–¼‚ª“¯‚¶ŠÔ‚ÍA“¯ˆêF‚Å“ˆê
+//[ æ¦‚  è¦ ]ã€€èƒŒæ™¯è‰²ã‚’è¨­å®šã™ã‚‹
+//[ å¼•  æ•° ]ã€€æœ€åˆã®è‰²ã‚’ã„ãšã‚Œã«ã™ã‚‹ã‹ã®ãƒˆã‚°ãƒ«
+// ã‚¯ãƒ©ã‚¹åãŒåˆæœŸå€¤ã®æ™‚ã¯ã€Œç™½ã€
+// ã‚¯ãƒ©ã‚¹åãŒåŒã˜é–“ã¯ã€åŒä¸€è‰²ã§çµ±ä¸€
 //*****************************************************************************
 procedure TMethodListForm.SetColor(ColorToggle: Boolean);
   function GetLastName(Index: Integer): string;
@@ -1026,7 +1023,7 @@ begin
       Continue;
     end;
 
-    //’¼‘O‚ÌƒNƒ‰ƒX–¼‚Æˆá‚¤AF‚ğ•ÏX
+    //ç›´å‰ã®ã‚¯ãƒ©ã‚¹åã¨é•ã†æ™‚ã€è‰²ã‚’å¤‰æ›´
     if AnsiSameText(GetLastName(i), GetLineInfo(i).ClassName) = False then
       ColorToggle := not ColorToggle;
 
@@ -1035,25 +1032,25 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@FMethodList‚ğİ’è‚·‚é
-//[ ˆø  ” ]@•ÒWƒtƒ@ƒCƒ‹‚Ì‘Ss
-//[ –ß‚è’l ]@(procedure or function) ‚Ìs”
+//[ æ¦‚  è¦ ]ã€€FMethodListã‚’è¨­å®šã™ã‚‹
+//[ å¼•  æ•° ]ã€€ç·¨é›†ãƒ•ã‚¡ã‚¤ãƒ«ã®å…¨è¡Œ
+//[ æˆ»ã‚Šå€¤ ]ã€€(procedure or function) ã®è¡Œæ•°
 //*****************************************************************************
 function TMethodListForm.SetMethodList(const Text: string): Integer;
 begin
-  //LineNo/Command/Define/ClassName/MethodName ‚ğİ’è
+  //LineNo/Command/Define/ClassName/MethodName ã‚’è¨­å®š
   Result := SetMethodLines(Text);
   if Result = 0 then Exit;
 
-  //FMethodList‚ÌColor‚ğƒNƒŠƒA‚·‚é
+  //FMethodListã®Colorã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
   ClearColor();
 
-  //FMethodList‚ÌBookMark‚ğİ’è‚·‚é
+  //FMethodListã®BookMarkã‚’è¨­å®šã™ã‚‹
   SetBookMarkInfo();
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@FMethodList‚Ì Color(”wŒiF)‚ğƒNƒŠƒA‚·‚é
+//[ æ¦‚  è¦ ]ã€€FMethodListã® Color(èƒŒæ™¯è‰²)ã‚’ã‚¯ãƒªã‚¢ã™ã‚‹
 //*****************************************************************************
 procedure TMethodListForm.ClearColor();
 var
@@ -1066,9 +1063,9 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@FMethodList‚Ì LineNo/Command/Define/ClassName/MethodName ‚ğİ’è
-//[ ˆø  ” ]@•ÒWƒtƒ@ƒCƒ‹‚Ì‘Ss
-//[ –ß‚è’l ]@(procedure or function) ‚Ìs”
+//[ æ¦‚  è¦ ]ã€€FMethodListã® LineNo/Command/Define/ClassName/MethodName ã‚’è¨­å®š
+//[ å¼•  æ•° ]ã€€ç·¨é›†ãƒ•ã‚¡ã‚¤ãƒ«ã®å…¨è¡Œ
+//[ æˆ»ã‚Šå€¤ ]ã€€(procedure or function) ã®è¡Œæ•°
 //*****************************************************************************
 function TMethodListForm.SetMethodLines(const Text: string): Integer;
 var
@@ -1081,10 +1078,10 @@ try
   try
     ST.Text := Text;
 
-    //s”‚ÆIndex‚ğ‚ ‚í‚¹‚é‚½‚ßæ“ª‚É1s‘}“ü
+    //è¡Œæ•°ã¨Indexã‚’ã‚ã‚ã›ã‚‹ãŸã‚å…ˆé ­ã«1è¡ŒæŒ¿å…¥
     ST.Insert(0, '');
 
-    //s”•ªƒ‹[ƒv
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—
     for i := 1 to ST.Count do
     begin
       if LowerCase(LeftStr(Trim(ST[i]), 9)) = 'interface' then
@@ -1098,9 +1095,9 @@ try
 
     SetLength(TmpArray, ST.Count);
 
-    //ŠY“–s”‚Ìæ“¾
+    //è©²å½“è¡Œæ•°ã®å–å¾—
     j := 0;
-    //s”•ªƒ‹[ƒv
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—
     RegExp.Pattern := C_CLASS;
     for i := FinterfaceRow + 1 to ST.Count - 1 do
     begin
@@ -1111,11 +1108,11 @@ try
       end;
     end;
 
-    //s”•ªƒ‹[ƒv(implementationß)
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—(implementationç¯€)
     RegExp.Pattern := C_METHOD;
     for i := FimplementationRow + 1 to ST.Count - 1 do
     begin
-      //forwardéŒ¾‚Í‘ÎÛŠO
+      //forwardå®£è¨€ã¯å¯¾è±¡å¤–
       if LowerCase(RightStr(Trim(ST[i]),8)) = 'forward;' then Continue;
       if RegExp.Test(ST[i]) then
       begin
@@ -1130,7 +1127,7 @@ try
     SetLength(FMethodList, j);
 
     j := -1;
-    //s”•ªƒ‹[ƒv‚µAFMethodList[j]‚ğİ’è
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—ã—ã€FMethodList[j]ã‚’è¨­å®š
     for i := 1 to ST.Count - 1 do
     begin
       case TmpArray[i] of
@@ -1143,8 +1140,8 @@ try
         begin
           LineNo  := i;
           Command := C_CLASSDEFINE; //
-          ClassName := Match.SubMatches[0]; //—á:TMethodListForm
-          Define  := Match.SubMatches[1]; //—á:class(TForm)
+          ClassName := Match.SubMatches[0]; //ä¾‹:TMethodListForm
+          Define  := Match.SubMatches[1]; //ä¾‹:class(TForm)
         end;
       end;
       2:
@@ -1155,20 +1152,20 @@ try
         with FMethodList[j] do
         begin
           LineNo  := i;
-          Command := Match.SubMatches[0]; //—á:procedure
-          Define  := Match.SubMatches[1]; //—á:TMethodListForm.SetMethodList(const Text: string);
+          Command := Match.SubMatches[0]; //ä¾‹:procedure
+          Define  := Match.SubMatches[1]; //ä¾‹:TMethodListForm.SetMethodList(const Text: string);
 
           if Match.SubMatches[5] = '' then
           begin
-            //—á:TMethodListForm.SetMethodList(const Text: string);
-            ClassName  := Match.SubMatches[3]; //—á:TMethodListForm
-            MethodName := Match.SubMatches[4]; //—á:SetMethodList
+            //ä¾‹:TMethodListForm.SetMethodList(const Text: string);
+            ClassName  := Match.SubMatches[3]; //ä¾‹:TMethodListForm
+            MethodName := Match.SubMatches[4]; //ä¾‹:SetMethodList
           end
           else
           begin
-            //—á:StringListCompareStrings(Index1, Index2: Integer): Integer;
+            //ä¾‹:StringListCompareStrings(Index1, Index2: Integer): Integer;
             ClassName  := '';
-            MethodName := Match.SubMatches[5]; //—á:StringListCompareStrings
+            MethodName := Match.SubMatches[5]; //ä¾‹:StringListCompareStrings
           end;
         end;
       end;
@@ -1183,7 +1180,7 @@ end;
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@FMethodList‚Ì BookMark ‚ğİ’è
+//[ æ¦‚  è¦ ]ã€€FMethodListã® BookMark ã‚’è¨­å®š
 //*****************************************************************************
 procedure TMethodListForm.SetBookMarkInfo();
 var
@@ -1191,13 +1188,13 @@ var
   BMLineNo: Integer;
   MethodLineInfo: TMethodLineInfo;
 begin
-  //ˆê’U‚·‚×‚Ä‚ğƒNƒŠƒA
+  //ä¸€æ—¦ã™ã¹ã¦ã‚’ã‚¯ãƒªã‚¢
   for i := 0 to Length(FMethodList) - 1 do
   begin
     FMethodList[i].BookMark := [];
   end;
 
-  //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+  //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
   for i := 0 to 9 do
   begin
     BMLineNo := EditView.BookmarkPos[i].Line;
@@ -1206,7 +1203,7 @@ begin
       MethodLineInfo := GetMethodLineInfo(BMLineNo, FText);
       if MethodLineInfo.StartRow <> 0 then
       begin
-        //ƒƒ\ƒbƒh”•ªƒ‹[ƒv
+        //ãƒ¡ã‚½ãƒƒãƒ‰æ•°åˆ†ãƒ«ãƒ¼ãƒ—
         for j := 0 to Length(FMethodList) - 1 do
         begin
           if MethodLineInfo.StartRow = FMethodList[j].LineNo then
@@ -1229,9 +1226,9 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ListBox‚ÌIndex‚ÉŠY“–‚·‚éTLineInfo‚ğæ“¾
-//[ ˆø  ” ]@ListBox‚ÌIndex
-//[ –ß‚è’l ]@TLineInfo
+//[ æ¦‚  è¦ ]ã€€ListBoxã®Indexã«è©²å½“ã™ã‚‹TLineInfoã‚’å–å¾—
+//[ å¼•  æ•° ]ã€€ListBoxã®Index
+//[ æˆ»ã‚Šå€¤ ]ã€€TLineInfo
 //*****************************************************************************
 function TMethodListForm.GetLineInfo(Index: Integer): TLineInfo;
 var
@@ -1242,7 +1239,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@u‚µ‚¨‚è‚Ìİ’èvƒƒjƒ…[ƒNƒŠƒbƒN
+//[ æ¦‚  è¦ ]ã€€ã€Œã—ãŠã‚Šã®è¨­å®šã€ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¯ãƒªãƒƒã‚¯æ™‚
 //*****************************************************************************
 procedure TMethodListForm.miBookMarkSetClick(Sender: TObject);
 begin
@@ -1254,8 +1251,8 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@u‚µ‚¨‚è‚Ìíœvƒƒjƒ…[ƒNƒŠƒbƒN
-//            ListBox‚ÅDELETEƒL[‰Ÿ‰º
+//[ æ¦‚  è¦ ]ã€€ã€Œã—ãŠã‚Šã®å‰Šé™¤ã€ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚¯ãƒªãƒƒã‚¯æ™‚
+//            ListBoxã§DELETEã‚­ãƒ¼æŠ¼ä¸‹æ™‚
 //*****************************************************************************
 procedure TMethodListForm.miBookMarkDelClick(Sender: TObject);
 begin
@@ -1264,13 +1261,13 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ]@ƒƒjƒ…[uƒJ[ƒ\ƒ‹ˆÊ’u‚Ö–ß‚évƒNƒŠƒbƒN
+//[ æ¦‚  è¦ ]ã€€ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã€Œã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã¸æˆ»ã‚‹ã€ã‚¯ãƒªãƒƒã‚¯æ™‚
 //*****************************************************************************
 procedure TMethodListForm.miGoBackClick(Sender: TObject);
 var
   i: Integer;
 begin
-  //ƒtƒH[ƒ€‹N“®‚ÌƒJ[ƒ\ƒ‹ˆÊ’u‚ğ•\¦
+  //ãƒ•ã‚©ãƒ¼ãƒ èµ·å‹•æ™‚ã®ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã‚’è¡¨ç¤º
   EditView.SetTopLeft(FTopRow, 1);
   EditView.SetCursorPos(FEditPos);
 
@@ -1290,7 +1287,7 @@ begin
     ListBox.ItemIndex := ListBox.Items.Count - 1;
   end;
 
-  //Ä•`‰æ
+  //å†æç”»
   EditView.Paint;
 end;
 

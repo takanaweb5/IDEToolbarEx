@@ -1,31 +1,23 @@
-unit GlobalUnit;
+ï»¿unit GlobalUnit;
 
 interface
-
 uses
-  Classes, ToolsAPI;
-
+  Classes, ToolsAPI, Clipbrd;
 type
   TLineType = (ltNon, ltClassDef, ltMethod, ltIniOrFinal, ltLogicStart, ltEnd);
-
   TLineInfo = record
     LineType:   TLineType;
     StartRow:   Integer;
     LogicStart: Integer;
     EndRow:     Integer;
   end;
-
   TLineInfoArray = array of TLineInfo;
-
   TMethodLineInfo = record
     CommentStart: Integer;
     StartRow:     Integer;
     LogicStart:   Integer;
     EndRow:       Integer;
   end;
-
-function WideStringToUtf8(const S: WideString): UTF8String;
-function Utf8ToWideString(const S: UTF8String): WideString;
 function CheckEditView(): Boolean;
 function GetAllText(): WideString; overLoad;
 function GetAllText(EditBuffer: IOTAEditBuffer): WideString; overLoad;
@@ -43,61 +35,18 @@ function GetStartLineArray(const AllText: string; out StartLineArray: TLineInfoA
 procedure BackupSource(BackupFolder: string; EditBuffer: IOTAEditBuffer);
 function GetCurrentProject(): IOTAProject;
 function GetModuleFromFileName(const FileName: string): IOTAModule;
-
 var
   EditView: IOTAEditView;
   RegExp, Match: OleVariant;
-
 const
   C_CLASS  = '^\s+(\w+)\s*=\s*(class(|\s*\(.+))\s*$';
   C_METHOD = '^(procedure|function|constructor|destructor)\s+(((\w+)\.(\w+)|(\w+)).*)$';
-
 implementation
-
 uses
   Windows, SysUtils, ComObj, Dialogs, StrUtils, Math;
-
 //*****************************************************************************
-//[ ŠT  —v ]@WideString‚ğUTF8‚Ì•¶š—ñ‚É•ÏŠ·‚·‚é
-//[ ˆø  ” ]@WideString
-//[ –ß‚è’l ]@UTF8‚Ì•¶š—ñ
-//*****************************************************************************
-function WideStringToUtf8(const S: WideString): UTF8String;
-var
-  Len: Integer;
-  Buf: array of AnsiChar;
-begin
-  Result := '';
-  Len := WideCharToMultiByte(CP_UTF8, 0, PWideChar(S), -1, nil, 0, nil, nil);
-  if Len = 0 then Exit;
-
-  SetLength(Buf,Len);
-  WideCharToMultiByte(CP_UTF8, 0, PWideChar(S), -1, PAnsiChar(Buf), Len, nil, nil);
-  SetString(Result, PChar(Buf), Len);
-end;
-
-//*****************************************************************************
-//[ ŠT  —v ]@UTF8‚Ì•¶š—ñ‚ğWideString‚É•ÏŠ·‚·‚é
-//[ ˆø  ” ]@UTF8‚Ì•¶š—ñ
-//[ –ß‚è’l ]@WideString
-//*****************************************************************************
-function Utf8ToWideString(const S: UTF8String): WideString;
-var
-  Len: Integer;
-  Buf: array of WideChar;
-begin
-  Result := '';
-  Len := MultiByteToWideChar(CP_UTF8, 0, PAnsiChar(S), Length(S), nil, 0);
-  if Len = 0 then Exit;
-
-  SetLength(Buf,Len + 1); //NULLI’[•ª‚P•¶š—]Œv‚ÉŠm•Û‚·‚é
-  MultiByteToWideChar(CP_UTF8, 0, PAnsiChar(S), Length(S), PWideChar(Buf), Len);
-  Result := PWideChar(Buf);
-end;
-
-//*****************************************************************************
-//[ ŠT  —v ]@•ÒW’†‚ÌEditViewƒIƒuƒWƒFƒNƒg‚ğPrivate•Ï”‚Éİ’è
-//[ –ß‚è’l ]@True:¬Œ÷
+//[ æ¦‚  è¦ ]ã€€ç·¨é›†ä¸­ã®EditViewã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’Privateå¤‰æ•°ã«è¨­å®š
+//[ æˆ»ã‚Šå€¤ ]ã€€True:æˆåŠŸ
 //*****************************************************************************
 function CheckEditView(): Boolean;
 begin
@@ -110,20 +59,18 @@ except
   Result := False;
 end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@•ÒW’†‚ÌƒGƒfƒBƒ^‚Ì‘S•¶š—ñ‚ğæ“¾
-//[ –ß‚è’l ]@•ÒW’†‚ÌƒGƒfƒBƒ^‚Ì‘S•¶š—ñ
+//[ æ¦‚  è¦ ]ã€€ç·¨é›†ä¸­ã®ã‚¨ãƒ‡ã‚£ã‚¿ã®å…¨æ–‡å­—åˆ—ã‚’å–å¾—
+//[ æˆ»ã‚Šå€¤ ]ã€€ç·¨é›†ä¸­ã®ã‚¨ãƒ‡ã‚£ã‚¿ã®å…¨æ–‡å­—åˆ—
 //*****************************************************************************
 function GetAllText(): WideString;
 begin
   Result := GetAllText(EditView.Buffer);
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@EditBuffer‚Ì‘S•¶š—ñ‚ğæ“¾
-//[ ˆø  ” ]@EditBuffer
-//[ –ß‚è’l ]@EditBuffer‚Ì‘S•¶š—ñ
+//[ æ¦‚  è¦ ]ã€€EditBufferã®å…¨æ–‡å­—åˆ—ã‚’å–å¾—
+//[ å¼•  æ•° ]ã€€EditBuffer
+//[ æˆ»ã‚Šå€¤ ]ã€€EditBufferã®å…¨æ–‡å­—åˆ—
 //*****************************************************************************
 function GetAllText(EditBuffer: IOTAEditBuffer): WideString;
 var
@@ -133,21 +80,18 @@ var
   Reader: IOTAEditReader;
 begin
   Result := '';
-
-  //ÅIs‚Ì––”ö‚ÌPos‚ğæ“¾
+  //æœ€çµ‚è¡Œã®æœ«å°¾ã®Posã‚’å–å¾—
   CharPos.Line := EditBuffer.EditPosition.LastRow;
   CharPos.CharIndex := 9999;
   EOFPos := EditBuffer.TopView.CharPosToPos(CharPos);
-
   SetLength(str, EOFPos);
   Reader := EditBuffer.CreateReader;
   Reader.GetText(0, PAnsiChar(str), EOFPos);
   Result := Utf8ToWideString(str);
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@LineNos‚Ì•¶š—ñ‚ğæ“¾
-//[ –ß‚è’l ]@•¶š—ñ
+//[ æ¦‚  è¦ ]ã€€LineNoè¡Œã®æ–‡å­—åˆ—ã‚’å–å¾—
+//[ æˆ»ã‚Šå€¤ ]ã€€æ–‡å­—åˆ—
 //*****************************************************************************
 function GetLineText(LineNo: Integer): WideString;
 var
@@ -156,42 +100,37 @@ var
   str: AnsiString;
   Reader: IOTAEditReader;
 begin
-  //•¶“ª‚Æ•¶––‚ÌPos‚ğæ“¾
+  //æ–‡é ­ã¨æ–‡æœ«ã®Posã‚’å–å¾—
   CharPos.Line := LineNo;
   CharPos.CharIndex := 0;
   BOLPos := EditView.CharPosToPos(CharPos);
   CharPos.CharIndex := 9999;
   EOLPos := EditView.CharPosToPos(CharPos);
-
   SetLength(str, EOLPos - BOLPos);
   Reader := EditView.Buffer.CreateReader;
   Reader.GetText(BOLPos, PAnsiChar(str), EOLPos - BOLPos);
   Result := Utf8ToWideString(str);
-  //––”ö‚Ì‰üs‚ğíœ
+  //æœ«å°¾ã®æ”¹è¡Œã‚’å‰Šé™¤
   Result := TrimRight(Result);
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹ˆÊ’u‚Ì’PŒê‚ğæ“¾
-//[ –ß‚è’l ]@Word
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã®å˜èªã‚’å–å¾—
+//[ æˆ»ã‚Šå€¤ ]ã€€Word
 //*****************************************************************************
 function GetCursorWord(): string;
 begin
   Result := '';
-
-  //‹éŒ`‘I‘ğ‚¾‚Æ‘ÎÛŠO
+  //çŸ©å½¢é¸æŠã ã¨å¯¾è±¡å¤–
   if EditView.Block.Style = btColumn then Exit;
-
-  //‘I‘ğ‚ª•¡”s‚¾‚Æ‘ÎÛŠO
+  //é¸æŠãŒè¤‡æ•°è¡Œã ã¨å¯¾è±¡å¤–
   if EditView.Block.StartingRow <> EditView.Block.EndingRow then Exit;
-  //‘I‘ğ”ÍˆÍ‚Ì•¶š—ñ‚ğæ“¾
+  //é¸æŠç¯„å›²ã®æ–‡å­—åˆ—ã‚’å–å¾—
   if EditView.Block.Size <> 0 then
   begin
     Result := Utf8ToWideString(EditView.Block.Text);
     Exit;
   end;
-
-  //ƒJ[ƒ\ƒ‹‰º‚Ì’PŒê‚ğæ“¾
+  //ã‚«ãƒ¼ã‚½ãƒ«ä¸‹ã®å˜èªã‚’å–å¾—
   if EditView.Position.IsWordCharacter then
   begin
     EditView.Position.Save;
@@ -205,9 +144,8 @@ begin
     EditView.Position.Restore;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹s‚Ìs––‚ÌˆÊ’u‚ğæ“¾
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«è¡Œã®è¡Œæœ«ã®ä½ç½®ã‚’å–å¾—
 //*****************************************************************************
 function GetEOLColumn(): Integer;
 var
@@ -215,31 +153,28 @@ var
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
 begin
-  //•¶––‚ÌPos‚ğæ“¾
+  //æ–‡æœ«ã®Posã‚’å–å¾—
   CharPos.Line := EditView.Position.Row;
   CharPos.CharIndex := 9999;
   EOLPos := EditView.CharPosToPos(CharPos);
-  CharPos := EditView.PosToCharPos(EOLPos - 1); //‰üs‚Í‘ÎÛŠO
-
-  //CharPos ¨ EditPos
+  CharPos := EditView.PosToCharPos(EOLPos - 1); //æ”¹è¡Œã¯å¯¾è±¡å¤–
+  //CharPos â†’ EditPos
   EditView.ConvertPos(False, EditPos, CharPos);
   Result := EditPos.Col;
-
-//  //Œ³‚Ìó‘Ô‚ğ•Û‘¶
+//  //å…ƒã®çŠ¶æ…‹ã‚’ä¿å­˜
 //  EditView.Position.Save;
 //  LeftColumn := EditView.LeftColumn;
 //
 //  EditView.Position.MoveEOL;
 //  Result := EditView.Position.Column;
 //
-//  //Œ³‚Ìó‘Ô‚ğ•œŒ³
+//  //å…ƒã®çŠ¶æ…‹ã‚’å¾©å…ƒ
 //  EditView.SetTopLeft(EditView.TopRow, LeftColumn);
 //  EditView.Position.Restore;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹‚Ì‚ ‚és‚ÌBookMarkID‚ğæ“¾(‚È‚¢‚Æ‚«‚Í-1)
-//[ –ß‚è’l ]@BookMarkID
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«ã®ã‚ã‚‹è¡Œã®BookMarkIDã‚’å–å¾—(ãªã„ã¨ãã¯-1)
+//[ æˆ»ã‚Šå€¤ ]ã€€BookMarkID
 //*****************************************************************************
 function GetActLineBookMarkID(): Integer;
 var
@@ -248,8 +183,7 @@ var
 begin
   Result := -1;
   Row := EditView.Position.Row;
-
-  //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+  //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
   for i := 0 to 9 do
   begin
     if Row = EditView.BookmarkPos[i].Line then
@@ -259,35 +193,31 @@ begin
     end;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@g—p‚³‚ê‚Ä‚¢‚éBookMarkID‚Ì”‚ğæ“¾‚·‚é
-//[ –ß‚è’l ]@g—p‚³‚ê‚Ä‚¢‚éBookMarkID‚Ì”
+//[ æ¦‚  è¦ ]ã€€ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹BookMarkIDã®æ•°ã‚’å–å¾—ã™ã‚‹
+//[ æˆ»ã‚Šå€¤ ]ã€€ä½¿ç”¨ã•ã‚Œã¦ã„ã‚‹BookMarkIDã®æ•°
 //*****************************************************************************
 function GetUsedBookMarkCount(): Integer;
 var
   i: Integer;
 begin
   Result := 0;
-
-  //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+  //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
   for i := 0 to 9 do
   begin
     if EditView.BookmarkPos[i].Line <> 0 then Inc(Result);
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@g—p‚³‚ê‚Ä‚¢‚È‚¢Å¬‚ÌBookMarkID‚ğæ“¾(‚·‚×‚Äg—pÏ‚İ‚Ì‚Í10)
-//[ –ß‚è’l ]@BookMarkID
+//[ æ¦‚  è¦ ]ã€€ä½¿ç”¨ã•ã‚Œã¦ã„ãªã„æœ€å°ã®BookMarkIDã‚’å–å¾—(ã™ã¹ã¦ä½¿ç”¨æ¸ˆã¿ã®æ™‚ã¯10)
+//[ æˆ»ã‚Šå€¤ ]ã€€BookMarkID
 //*****************************************************************************
 function GetUnusedBookMarkID(): Integer;
 var
   i: Integer;
 begin
   Result := 10;
-
-  //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+  //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
   for i := 0 to 9 do
   begin
     if EditView.BookmarkPos[i].Line = 0 then
@@ -297,11 +227,10 @@ begin
     end;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒJ[ƒ\ƒ‹s‚Ì’¼‘O‚Ü‚½‚Í’¼Œã‚ÌBookmark‚ğæ“¾(‚È‚¢‚Æ‚«‚Í-1)
-//[ ˆø  ” ]@PrevOrNext:-1=‘O•ûŒŸõA+1:Œã•ûŒŸõ
-//[ –ß‚è’l ]@BookMarkID
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¼ã‚½ãƒ«è¡Œã®ç›´å‰ã¾ãŸã¯ç›´å¾Œã®Bookmarkã‚’å–å¾—(ãªã„ã¨ãã¯-1)
+//[ å¼•  æ•° ]ã€€PrevOrNext:-1=å‰æ–¹æ¤œç´¢ã€+1:å¾Œæ–¹æ¤œç´¢
+//[ æˆ»ã‚Šå€¤ ]ã€€BookMarkID
 //*****************************************************************************
 function GetNextBookmarkID(PrevOrNext: Integer): Integer;
   function SerchNextBookmarkID(ActRow: Integer): Integer;
@@ -312,7 +241,7 @@ function GetNextBookmarkID(PrevOrNext: Integer): Integer;
     Result := -1;
     if PrevOrNext < 0 then  Row := 0
                       else  Row := EditView.Position.LastRow + 1;
-    //ƒuƒbƒNƒ}[ƒN”ƒ‹[ƒv
+    //ãƒ–ãƒƒã‚¯ãƒãƒ¼ã‚¯æ•°ãƒ«ãƒ¼ãƒ—
     for i := 0 to 9 do
     begin
       BookRow := EditView.BookmarkPos[i].Line;
@@ -343,16 +272,14 @@ begin
   ActRow := EditView.Position.Row;
   Result := SerchNextBookmarkID(ActRow);
   if Result >= 0 then Exit;
-
-  //Œ©‚Â‚©‚ç‚È‚©‚Á‚½AÜ‚è•Ô‚µ‚ÄÅ‘å‚Ü‚½‚ÍÅ¬‚ÌBookmark‚ğ’T‚·
+  //è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸæ™‚ã€æŠ˜ã‚Šè¿”ã—ã¦æœ€å¤§ã¾ãŸã¯æœ€å°ã®Bookmarkã‚’æ¢ã™
   if PrevOrNext < 0 then  ActRow := EditView.Position.LastRow + 1
                     else  ActRow := 0;
   Result := SerchNextBookmarkID(ActRow);
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@æ“ªs‚©‚çÅIs‚Ü‚Ås‘I‘ğ‚ğs‚¤
-//[ ˆø  ” ]@æ“ªsAÅIs
+//[ æ¦‚  è¦ ]ã€€å…ˆé ­è¡Œã‹ã‚‰æœ€çµ‚è¡Œã¾ã§è¡Œé¸æŠã‚’è¡Œã†
+//[ å¼•  æ•° ]ã€€å…ˆé ­è¡Œã€æœ€çµ‚è¡Œ
 //*****************************************************************************
 procedure SelectRows(StarRow, EndRow: Integer);
 begin
@@ -366,11 +293,10 @@ begin
     EditView.Position.MoveEOF;
   EditView.Block.EndBlock;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@Lines‚Ì’¼‘O‚ÌƒRƒƒ“ƒgŠJns‚ğæ“¾‚·‚é
-//[ ˆø  ” ]@s”Ô†A‚·‚×‚Ä‚Ìs
-//[ –ß‚è’l ]@TMethodLineInfo
+//[ æ¦‚  è¦ ]ã€€Lineè¡Œã®ç›´å‰ã®ã‚³ãƒ¡ãƒ³ãƒˆé–‹å§‹è¡Œã‚’å–å¾—ã™ã‚‹
+//[ å¼•  æ•° ]ã€€è¡Œç•ªå·ã€ã™ã¹ã¦ã®è¡Œ
+//[ æˆ»ã‚Šå€¤ ]ã€€TMethodLineInfo
 //*****************************************************************************
 function GetCommentStart(LineNo: Integer; AllText: string): Integer;
 const
@@ -380,16 +306,14 @@ var
   ST: TStringList;
 begin
   Result := LineNo;
-
   ST := TStringList.Create;
   try
     ST.Text := AllText;
-    //s”‚ÆIndex‚ğ‚ ‚í‚¹‚é‚½‚ßæ“ª‚É1s‘}“ü
+    //è¡Œæ•°ã¨Indexã‚’ã‚ã‚ã›ã‚‹ãŸã‚å…ˆé ­ã«1è¡ŒæŒ¿å…¥
     ST.Insert(0, '');
-
-    //—á '//`' or '{`}' or '(*`*)'
+    //ä¾‹ '//ï½' or '{ï½}' or '(*ï½*)'
     RegExp.Pattern := '(^//.*$|^\{.*\}$|^\(\*.*\*\)$)';
-    //StartRow‚Ì1s‘O‚©‚ç1s–ˆ‚Éã•ûŒü‚Éƒ‹[ƒv‚µAƒRƒƒ“ƒg‚Ìæ“ªs‚ğŒŸõ
+    //StartRowã®1è¡Œå‰ã‹ã‚‰1è¡Œæ¯ã«ä¸Šæ–¹å‘ã«ãƒ«ãƒ¼ãƒ—ã—ã€ã‚³ãƒ¡ãƒ³ãƒˆã®å…ˆé ­è¡Œã‚’æ¤œç´¢
     for i := LineNo - 1 downto 1 do
     begin
       if not RegExp.Test(Trim(ST[i])) then
@@ -398,22 +322,21 @@ begin
         Break;
       end;
     end;
-
     if LineNo = Result then
     begin
-      //—á  '`}' or '`*)'
+      //ä¾‹  'ï½}' or 'ï½*)'
       RegExp.Pattern := '(\}|\*\))$';
-      //StartRow‚Ì1s‘O‚ªƒRƒƒ“ƒg‚ÌI—¹s‚Ì
+      //StartRowã®1è¡Œå‰ãŒã‚³ãƒ¡ãƒ³ãƒˆã®çµ‚äº†è¡Œã®æ™‚
       if RegExp.Test(Trim(ST[LineNo - 1])) then
       begin
         j :=0;
-        //—á  '{`' or '(*`'
+        //ä¾‹  '{ï½' or '(*ï½'
         RegExp.Pattern := '^(\{|\(\*)';
-        //StartRow‚Ì2s‘O‚©‚ç1s–ˆ‚Éã•ûŒü‚Éƒ‹[ƒv‚µAƒRƒƒ“ƒg‚Ìæ“ªs‚ğŒŸõ
+        //StartRowã®2è¡Œå‰ã‹ã‚‰1è¡Œæ¯ã«ä¸Šæ–¹å‘ã«ãƒ«ãƒ¼ãƒ—ã—ã€ã‚³ãƒ¡ãƒ³ãƒˆã®å…ˆé ­è¡Œã‚’æ¤œç´¢
         for i := LineNo - 2 downto 1 do
         begin
           Inc(j);
-          //ƒRƒƒ“ƒgŠJns‚ÌŒŸõ‚ÉãŒÀ‚ğİ‚¯‚é
+          //ã‚³ãƒ¡ãƒ³ãƒˆé–‹å§‹è¡Œã®æ¤œç´¢ã«ä¸Šé™ã‚’è¨­ã‘ã‚‹
           if j > MAXCOMMENT then Break;
           if RegExp.Test(Trim(ST[i])) then
           begin
@@ -426,16 +349,14 @@ begin
   finally
     ST.Free;
   end;
-
   if Result = LineNo then
     Result := LineNo - 1;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒNƒ‰ƒXéŒ¾s or ƒƒ\ƒbƒhŠJnsetc ‚ÌˆÊ’u‚ğ”z—ñ‚Éæ“¾‚·‚é
-//[ ˆø  ” ]@•ÒWƒtƒ@ƒCƒ‹‚Ì‘SsA
-//[ Œ‹  ‰Ê ]@StartLineArrayFƒNƒ‰ƒXéŒ¾s or ƒƒ\ƒbƒhŠJnsetc ‚Ì”z—ñ
-//[ –ß‚è’l ]@ƒNƒ‰ƒXéŒ¾s or ƒƒ\ƒbƒhŠJns ‚Ì”
+//[ æ¦‚  è¦ ]ã€€ã‚¯ãƒ©ã‚¹å®£è¨€è¡Œ or ãƒ¡ã‚½ãƒƒãƒ‰é–‹å§‹è¡Œetc ã®ä½ç½®ã‚’é…åˆ—ã«å–å¾—ã™ã‚‹
+//[ å¼•  æ•° ]ã€€ç·¨é›†ãƒ•ã‚¡ã‚¤ãƒ«ã®å…¨è¡Œã€
+//[ çµ  æœ ]ã€€StartLineArrayï¼šã‚¯ãƒ©ã‚¹å®£è¨€è¡Œ or ãƒ¡ã‚½ãƒƒãƒ‰é–‹å§‹è¡Œetc ã®é…åˆ—
+//[ æˆ»ã‚Šå€¤ ]ã€€ã‚¯ãƒ©ã‚¹å®£è¨€è¡Œ or ãƒ¡ã‚½ãƒƒãƒ‰é–‹å§‹è¡Œ ã®æ•°
 //*****************************************************************************
 function GetStartLineArray(const AllText: string; out StartLineArray: TLineInfoArray): Integer;
 var
@@ -443,19 +364,16 @@ var
   NextStartRow: Integer;
   ST: TStringList;
   TmpArray: array of TLineType;
-  interfaceRow, implementationRow: Integer; //interface,implementation‚Ìs
+  interfaceRow, implementationRow: Integer; //interface,implementationã®è¡Œ
 begin
   StartLineArray := nil;
   Result := 0;
-
   ST := TStringList.Create();
   try
     ST.Text := AllText;
-
-    //s”‚ÆIndex‚ğ‚ ‚í‚¹‚é‚½‚ßæ“ª‚É1s‘}“ü
+    //è¡Œæ•°ã¨Indexã‚’ã‚ã‚ã›ã‚‹ãŸã‚å…ˆé ­ã«1è¡ŒæŒ¿å…¥
     ST.Insert(0, '');
-
-    //interface,implementation‚Ìs‚ğæ“¾
+    //interface,implementationã®è¡Œã‚’å–å¾—
     implementationRow := 0;
     interfaceRow := 0;
     for i := 1 to ST.Count - 1 do
@@ -470,11 +388,9 @@ begin
         Break;
       end;
     end;
-
     SetLength(TmpArray, ST.Count);
     j := 0;
-
-    //s”•ªƒ‹[ƒv‚µAƒNƒ‰ƒXéŒ¾s‚ğæ“¾
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—ã—ã€ã‚¯ãƒ©ã‚¹å®£è¨€è¡Œã‚’å–å¾—
     RegExp.Pattern := C_CLASS;
     for i := interfaceRow + 1 to ST.Count - 1 do
     begin
@@ -484,12 +400,11 @@ begin
         Inc(j);
       end;
     end;
-
-    //s”•ªƒ‹[ƒv‚µ(implementationß)Aƒƒ\ƒbƒhŠJns‚ğæ“¾
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—ã—(implementationç¯€)ã€ãƒ¡ã‚½ãƒƒãƒ‰é–‹å§‹è¡Œã‚’å–å¾—
     RegExp.Pattern := C_METHOD;
     for i := implementationRow + 1 to ST.Count - 1 do
     begin
-      //forwardéŒ¾‚Í‘ÎÛŠO
+      //forwardå®£è¨€ã¯å¯¾è±¡å¤–
       if LowerCase(RightStr(Trim(ST[i]),8)) = 'forward;' then Continue;
       if RegExp.Test(ST[i]) then
       begin
@@ -497,11 +412,10 @@ begin
         Inc(j);
       end;
     end;
-
-    //ÅIs‚©‚çƒ‹[ƒv‚µAinitialization‚Æfinalization‚ğæ“¾
+    //æœ€çµ‚è¡Œã‹ã‚‰ãƒ«ãƒ¼ãƒ—ã—ã€initializationã¨finalizationã‚’å–å¾—
     for i := ST.Count - 1 downto implementationRow + 1 do
     begin
-      //ƒƒ\ƒbƒh
+      //ãƒ¡ã‚½ãƒƒãƒ‰
       if Ord(TmpArray[i]) <> 0 then Break;
       if LowerCase(LeftStr(Trim(ST[i]),14)) = 'initialization' then
       begin
@@ -514,14 +428,11 @@ begin
         Inc(j);
       end;
     end;
-
     Result := j;
     if Result = 0 then Exit;
-
     SetLength(StartLineArray, j);
     j := 0;
-
-    //s”•ªƒ‹[ƒv‚µAStartLineArray‚ÌStartRow‚ğİ’è
+    //è¡Œæ•°åˆ†ãƒ«ãƒ¼ãƒ—ã—ã€StartLineArrayã®StartRowã‚’è¨­å®š
     for i := 1 to ST.Count - 1 do
     begin
       if Ord(TmpArray[i]) <> 0 then
@@ -531,27 +442,24 @@ begin
         Inc(j);
       end;
     end;
-
-    //StartLineArray‚Ì”z—ñ‚Ì”‚¾‚¯ƒ‹[ƒv‚µALogicStart,EndRow‚ğİ’è
+    //StartLineArrayã®é…åˆ—ã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—ã—ã€LogicStart,EndRowã‚’è¨­å®š
     for i := Low(StartLineArray) to High(StartLineArray) do
     begin
       with StartLineArray[i] do
       begin
-        //‰¼‚Éİ’è
+        //ä»®ã«è¨­å®š
         LogicStart := StartRow;
         EndRow     := StartRow;
-
-        //Ÿ‚Ìƒƒ\ƒbƒh‚ÌŠJns‚ğæ“¾
+        //æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®é–‹å§‹è¡Œã‚’å–å¾—
         if i < High(StartLineArray) then
           NextStartRow := StartLineArray[i+1].StartRow - 1
         else
-          //ÅŒã‚Ìƒƒ\ƒbƒh‚Ì‚ÍÅIs‚ğİ’è
+          //æœ€å¾Œã®ãƒ¡ã‚½ãƒƒãƒ‰ã®æ™‚ã¯æœ€çµ‚è¡Œã‚’è¨­å®š
           NextStartRow := ST.Count - 1;
-
         case LineType of
         ltClassDef:
         begin
-          //StartRow‚©‚çŸ‚Ìƒƒ\ƒbƒh‚ÌŠJns‚Ü‚Åƒ‹[ƒv
+          //StartRowã‹ã‚‰æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®é–‹å§‹è¡Œã¾ã§ãƒ«ãƒ¼ãƒ—
           for j := StartRow to NextStartRow do
           begin
             if LowerCase(LeftStr(Trim(ST[j]),4)) = 'end;' then
@@ -563,7 +471,7 @@ begin
         end;
         ltMethod:
         begin
-          //StartRow‚©‚çŸ‚Ìƒƒ\ƒbƒh‚ÌŠJns‚Ü‚Åƒ‹[ƒv
+          //StartRowã‹ã‚‰æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®é–‹å§‹è¡Œã¾ã§ãƒ«ãƒ¼ãƒ—
           for j := StartRow to NextStartRow do
           begin
             if LowerCase(LeftStr(ST[j],5)) = 'begin' then
@@ -572,7 +480,7 @@ begin
               Break;
             end;
           end;
-          //LogicStart‚©‚çŸ‚Ìƒƒ\ƒbƒh‚ÌŠJns‚Ü‚Åƒ‹[ƒv
+          //LogicStartã‹ã‚‰æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®é–‹å§‹è¡Œã¾ã§ãƒ«ãƒ¼ãƒ—
           for j := LogicStart to NextStartRow do
           begin
             if LowerCase(LeftStr(ST[j],4)) = 'end;' then
@@ -589,50 +497,46 @@ begin
     ST.Free;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@Line‚ğŠÜ‚Şƒƒ\ƒbƒh‚Ìsî•ñ‚ğæ“¾
-//[ ˆø  ” ]@s”Ô†A‚·‚×‚Ä‚Ìs
-//[ –ß‚è’l ]@TMethodLineInfo
+//[ æ¦‚  è¦ ]ã€€Lineã‚’å«ã‚€ãƒ¡ã‚½ãƒƒãƒ‰ã®è¡Œæƒ…å ±ã‚’å–å¾—
+//[ å¼•  æ•° ]ã€€è¡Œç•ªå·ã€ã™ã¹ã¦ã®è¡Œ
+//[ æˆ»ã‚Šå€¤ ]ã€€TMethodLineInfo
 //*****************************************************************************
 function GetMethodLineInfo(LineNo: Integer; AllText: string): TMethodLineInfo;
 var
   i, j: Integer;
   ST: TStringList;
 begin
-  //Result‚Ì‰Šú‰»
+  //Resultã®åˆæœŸåŒ–
   with Result do
   begin
-    CommentStart := 0; //ƒƒ\ƒbƒh‚ÌƒRƒƒ“ƒg‚ÌŠJns
-    StartRow     := 0; //—á procedure GetXXX();
-    LogicStart   := 0; //—á begin ‚ÌŸ‚Ìs
-    EndRow       := 0; //—á end;
+    CommentStart := 0; //ãƒ¡ã‚½ãƒƒãƒ‰ã®ã‚³ãƒ¡ãƒ³ãƒˆã®é–‹å§‹è¡Œ
+    StartRow     := 0; //ä¾‹ procedure GetXXX();
+    LogicStart   := 0; //ä¾‹ begin ã®æ¬¡ã®è¡Œ
+    EndRow       := 0; //ä¾‹ end;
   end;
-
   ST := TStringList.Create;
   try
     ST.Text := AllText;
-    //s”‚ÆIndex‚ğ‚ ‚í‚¹‚é‚½‚ßæ“ª‚É1s‘}“ü
+    //è¡Œæ•°ã¨Indexã‚’ã‚ã‚ã›ã‚‹ãŸã‚å…ˆé ­ã«1è¡ŒæŒ¿å…¥
     ST.Insert(0, '');
-
-    //implementation s‚Ìæ“¾
+    //implementation è¡Œã®å–å¾—
     j := 1;
     for i := 1 to ST.Count - 1 do
     begin
       if LowerCase(Copy(Trim(ST[i]),1,14)) = 'implementation' then
       begin
         if LineNo <= i then Exit;
-        //implementation sˆÈ‘O‚ÍŒŸõ‚Ì‘ÎÛ‚Æ‚µ‚È‚¢
+        //implementation è¡Œä»¥å‰ã¯æ¤œç´¢ã®å¯¾è±¡ã¨ã—ãªã„
         j := i + 1;
         Break;
       end;
     end;
-
     //******************************************************************
-    // StartRow‚ğİ’è
+    // StartRowã‚’è¨­å®š
     //******************************************************************
     RegExp.Pattern := '^(procedure|function|constructor|destructor|initialization|finalization)';
-    //LineˆÊ’u‚©‚ç1s–ˆ‚Éã•ûŒü‚Éƒ‹[ƒv‚µAƒƒ\ƒbƒh‚Ìæ“ªs‚ğŒŸõ
+    //Lineä½ç½®ã‹ã‚‰1è¡Œæ¯ã«ä¸Šæ–¹å‘ã«ãƒ«ãƒ¼ãƒ—ã—ã€ãƒ¡ã‚½ãƒƒãƒ‰ã®å…ˆé ­è¡Œã‚’æ¤œç´¢
     for i := Min(LineNo, ST.Count - 1) downto j do
     begin
       if RegExp.Test(ST[i]) then
@@ -640,68 +544,28 @@ begin
         Result.StartRow := i;
         Break;
       end;
-      //‘O•û‚Ìƒƒ\ƒbƒh‚ÌI—¹‚ğŒ©‚Â‚¯‚Ä‚µ‚Ü‚Á‚½
+      //å‰æ–¹ã®ãƒ¡ã‚½ãƒƒãƒ‰ã®çµ‚äº†ã‚’è¦‹ã¤ã‘ã¦ã—ã¾ã£ãŸ
       if LowerCase(Copy(ST[i - 1],1,4)) = 'end;' then Exit;
     end;
-    //Œ©‚Â‚©‚ç‚È‚©‚Á‚½
+    //è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸæ™‚
     if Result.StartRow = 0 then Exit;
-
     //******************************************************************
-    // CommentStart‚ğİ’è
+    // CommentStartã‚’è¨­å®š
     //******************************************************************
     Result.CommentStart := GetCommentStart(Result.StartRow, AllText);
-
-//    //—á '//`' or '{`}' or '(*`*)'
-//    RegExp.Pattern := '(^//.*$|^\{.*\}$|^\(\*.*\*\)$)';
-//    //StartRow‚Ì1s‘O‚©‚ç1s–ˆ‚Éã•ûŒü‚Éƒ‹[ƒv‚µAƒRƒƒ“ƒg‚Ìæ“ªs‚ğŒŸõ
-//    for i := Result.StartRow - 1 downto j do
-//    begin
-//      if not RegExp.Test(Trim(ST[i])) then
-//      begin
-//        Result.CommentStart := i + 1;
-//        Break;
-//      end;
-//    end;
-//
-//    if Result.CommentStart = Result.StartRow then
-//    begin
-//      //—á  '`}' or '`*)'
-//      RegExp.Pattern := '(\}|\*\))$';
-//      //StartRow‚Ì1s‘O‚ªƒRƒƒ“ƒg‚ÌI—¹s‚Ì
-//      if RegExp.Test(Trim(ST[Result.StartRow - 1])) then
-//      begin
-//        k :=0;
-//        //—á  '{`' or '(*`'
-//        RegExp.Pattern := '^(\{|\(\*)';
-//        //StartRow‚Ì2s‘O‚©‚ç1s–ˆ‚Éã•ûŒü‚Éƒ‹[ƒv‚µAƒRƒƒ“ƒg‚Ìæ“ªs‚ğŒŸõ
-//        for i := Result.StartRow - 2 downto j do
-//        begin
-//          Inc(k);
-//          //ƒRƒƒ“ƒgŠJns‚ÌŒŸõ‚ÉãŒÀ‚ğİ‚¯‚é
-//          if k > MAXCOMMENT then Break;
-//          if RegExp.Test(Trim(ST[i])) then
-//          begin
-//            Result.CommentStart := i;
-//            Break;
-//          end;
-//        end;
-//      end;
-//    end;
-
     //******************************************************************
-    // LogicStart‚ğİ’è
+    // LogicStartã‚’è¨­å®š
     //******************************************************************
     RegExp.Pattern := '^(procedure|function|constructor|destructor|initialization|finalization)';
-    //StartRow‚Ì1sŒã‚©‚ç1s–ˆ‚É‰º•ûŒü‚Éƒ‹[ƒv‚µAƒƒWƒbƒN‚Ìæ“ªs‚ğŒŸõ
-    for i := Result.StartRow + 1 to ST.Count - 2 do  //—áŠO‚Æ‚È‚ç‚È‚¢‚æ‚¤‚É2‚ğˆø‚­
+    //StartRowã®1è¡Œå¾Œã‹ã‚‰1è¡Œæ¯ã«ä¸‹æ–¹å‘ã«ãƒ«ãƒ¼ãƒ—ã—ã€ãƒ­ã‚¸ãƒƒã‚¯ã®å…ˆé ­è¡Œã‚’æ¤œç´¢
+    for i := Result.StartRow + 1 to ST.Count - 2 do  //ä¾‹å¤–ã¨ãªã‚‰ãªã„ã‚ˆã†ã«2ã‚’å¼•ã
     begin
       if LowerCase(Copy(ST[i],1,5)) = 'begin' then
       begin
         Result.LogicStart := i + 1;
         Break;
       end;
-
-      //Ÿ‚Ìƒƒ\ƒbƒh‚É‚È‚Á‚Ä‚µ‚Ü‚Á‚½B
+      //æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã«ãªã£ã¦ã—ã¾ã£ãŸã€‚
       if RegExp.Test(ST[i]) then
       begin
         Result.LogicStart := Result.StartRow;
@@ -709,19 +573,18 @@ begin
         Exit;
       end;
     end;
-    //Œ©‚Â‚©‚ç‚È‚©‚Á‚½
+    //è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸæ™‚
     if Result.LogicStart = 0 then
     begin
       Result.LogicStart := Result.StartRow;
       Result.EndRow := Result.StartRow;
       Exit;
     end;
-
     //******************************************************************
-    // EndRow‚ğİ’è
+    // EndRowã‚’è¨­å®š
     //******************************************************************
     RegExp.Pattern := '^(procedure|function|constructor|destructor|initialization|finalization)';
-    //LogicStart‚Ì1sŒã‚©‚ç1s–ˆ‚É‰º•ûŒü‚Éƒ‹[ƒv‚µAƒƒ\ƒbƒh‚ÌI—¹s‚ğŒŸõ
+    //LogicStartã®1è¡Œå¾Œã‹ã‚‰1è¡Œæ¯ã«ä¸‹æ–¹å‘ã«ãƒ«ãƒ¼ãƒ—ã—ã€ãƒ¡ã‚½ãƒƒãƒ‰ã®çµ‚äº†è¡Œã‚’æ¤œç´¢
     for i := Result.LogicStart + 1 to ST.Count - 1 do
     begin
       if LowerCase(Copy(ST[i],1,4)) = 'end;' then
@@ -729,8 +592,7 @@ begin
         Result.EndRow := i;
         Break;
       end;
-
-      //Ÿ‚Ìƒƒ\ƒbƒh‚É‚È‚Á‚Ä‚µ‚Ü‚Á‚½B
+      //æ¬¡ã®ãƒ¡ã‚½ãƒƒãƒ‰ã«ãªã£ã¦ã—ã¾ã£ãŸã€‚
       if RegExp.Test(ST[i]) then
       begin
         Result.LogicStart := Result.StartRow;
@@ -738,21 +600,19 @@ begin
         Exit;
       end;
     end;
-    //Œ©‚Â‚©‚ç‚È‚©‚Á‚½
+    //è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸæ™‚
     if Result.EndRow = 0 then
     begin
       Result.EndRow := Result.LogicStart;
       Exit;
     end;
-
   finally
     ST.Free;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@BackupFolder‚ÉEditBuffer‚Ìƒ\[ƒX‚ğ•Û‘¶‚·‚é
-//[ ˆø  ” ]@BackupFolder–¼‚ÆEditBuffer
+//[ æ¦‚  è¦ ]ã€€BackupFolderã«EditBufferã®ã‚½ãƒ¼ã‚¹ã‚’ä¿å­˜ã™ã‚‹
+//[ å¼•  æ•° ]ã€€BackupFolderåã¨EditBuffer
 //*****************************************************************************
 procedure BackupSource(BackupFolder: string; EditBuffer: IOTAEditBuffer);
 var
@@ -760,14 +620,12 @@ var
   ST: TStringList;
 begin
   FileName := BackupFolder + '\' + ExtractFileName(EditBuffer.FileName);
-
-  //ƒoƒbƒNƒAƒbƒvƒtƒHƒ‹ƒ_‚ª‘¶İ‚µ‚È‚¯‚ê‚Îì¬
+  //ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚©ãƒ«ãƒ€ãŒå­˜åœ¨ã—ãªã‘ã‚Œã°ä½œæˆ
   if not DirectoryExists(BackupFolder) then
   begin
     if not CreateDir(BackupFolder) then Exit;
   end;
-
-  //ƒ\[ƒX‚ğ•Û‘¶
+  //ã‚½ãƒ¼ã‚¹ã‚’ä¿å­˜
   ST := TStringList.Create;
   try try
     ST.Text := GetAllText(EditBuffer);
@@ -778,8 +636,8 @@ begin
   except end;
 end;
 //*****************************************************************************
-//[ ŠT  —v ]@ƒJƒŒƒ“ƒg‚ÌIOTAProjectƒCƒ“ƒ^[ƒtƒF[ƒXƒIƒuƒWƒFƒNƒg‚ğæ“¾
-//[ –ß‚è’l ]@IOTAProject
+//[ æ¦‚  è¦ ]ã€€ã‚«ãƒ¬ãƒ³ãƒˆã®IOTAProjectã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—
+//[ æˆ»ã‚Šå€¤ ]ã€€IOTAProject
 //*****************************************************************************
 function GetCurrentProject(): IOTAProject;
 var
@@ -789,11 +647,9 @@ var
   Module: IOTAModule;
 begin
   Result := nil;
-
   ModuleServices := (BorlandIDEServices as IOTAModuleServices);
   if ModuleServices.ModuleCount = 0 then Exit;
-
-  //Module‚Ì”‚¾‚¯ƒ‹[ƒv
+  //Moduleã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—
   for i := 0 to ModuleServices.ModuleCount - 1 do
   begin
     Module := ModuleServices.Modules[i];
@@ -803,8 +659,7 @@ begin
       Exit;
     end;
   end;
-
-  //Module‚Ì”‚¾‚¯ƒ‹[ƒv
+  //Moduleã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—
   for i := 0 to ModuleServices.ModuleCount - 1 do
   begin
     Module := ModuleServices.Modules[i];
@@ -815,33 +670,30 @@ begin
     end;
   end;
 end;
-
 //*****************************************************************************
-//[ ŠT  —v ]@ƒtƒ@ƒCƒ‹–¼‚©‚çIOTAModuleƒCƒ“ƒ^[ƒtƒF[ƒXƒIƒuƒWƒFƒNƒg‚ğæ“¾
-//[ ˆø  ” ]@ƒtƒ@ƒCƒ‹–¼
-//[ –ß‚è’l ]@IOTAModule
+//[ æ¦‚  è¦ ]ã€€ãƒ•ã‚¡ã‚¤ãƒ«åã‹ã‚‰IOTAModuleã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—
+//[ å¼•  æ•° ]ã€€ãƒ•ã‚¡ã‚¤ãƒ«å
+//[ æˆ»ã‚Šå€¤ ]ã€€IOTAModule
 //*****************************************************************************
 function GetModuleFromFileName(const FileName: string): IOTAModule;
 var
   ModuleServices: IOTAModuleServices;
 begin
   Result := nil;
-
   ModuleServices := (BorlandIDEServices as IOTAModuleServices);
   if ModuleServices.ModuleCount = 0 then Exit;
   Result := ModuleServices.FindModule(FileName);
 end;
-
 //*****************************************************************************
 //initialization
 //*****************************************************************************
 initialization
-  //‚‘¬‰»‚Ì‚½‚ß‚±‚±‚Å³‹K•\Œ»‚Ì€”õ
+  //é«˜é€ŸåŒ–ã®ãŸã‚ã“ã“ã§æ­£è¦è¡¨ç¾ã®æº–å‚™
   RegExp := CreateOleObject('VBScript.RegExp');
-  RegExp.IgnoreCase := True;  //‘å•¶š‚Æ¬•¶š‚ğ‹æ•Ê‚µ‚È‚¢
-
+  RegExp.IgnoreCase := True;  //å¤§æ–‡å­—ã¨å°æ–‡å­—ã‚’åŒºåˆ¥ã—ãªã„
 //*****************************************************************************
 //finalization
 //*****************************************************************************
 finalization
 end.
+

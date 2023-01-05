@@ -1,4 +1,4 @@
-unit OnDebug;
+ï»¿unit OnDebug;
 
 interface
 
@@ -25,7 +25,7 @@ var
   IDENo2: Integer;
 
 //*****************************************************************************
-//“o˜^
+//ç™»éŒ²
 //*****************************************************************************
 procedure Register;
 begin
@@ -33,7 +33,7 @@ begin
 end;
 
 //*****************************************************************************
-//íœ
+//å‰Šé™¤
 //*****************************************************************************
 procedure UnRegister;
 begin
@@ -45,9 +45,9 @@ end;
 { TDebuggerNotifier }
 //////////////////////////////////////////////////////////////////////////
 //*****************************************************************************
-//[ƒCƒxƒ“ƒg] ProcessCreated
-//[ ŠT  —v ] ŠJ‚¢‚Ä‚¢‚éƒ\[ƒX‚Å•ÏX’†‚Ì‚à‚Ì‚É‚Â‚¢‚ÄAƒvƒƒWƒFƒNƒgƒtƒHƒ‹ƒ_”z‰º‚É
-//           BackupƒtƒHƒ‹ƒ_‚ğì¬‚µAƒtƒ@ƒCƒ‹‚ğ•Û‘¶
+//[ã‚¤ãƒ™ãƒ³ãƒˆ] ProcessCreatedæ™‚
+//[ æ¦‚  è¦ ] é–‹ã„ã¦ã„ã‚‹ã‚½ãƒ¼ã‚¹ã§å¤‰æ›´ä¸­ã®ã‚‚ã®ã«ã¤ã„ã¦ã€ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆãƒ•ã‚©ãƒ«ãƒ€é…ä¸‹ã«
+//           Backupãƒ•ã‚©ãƒ«ãƒ€ã‚’ä½œæˆã—ã€ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
 //*****************************************************************************
 procedure TDebuggerNotifier.ProcessCreated(const Process: IOTAProcess);
 var
@@ -66,12 +66,12 @@ begin
   if not Assigned(Project) then Exit;
   BackupFolder := ExtractFileDir(Project.FileName) + '\Backup';
 
-  //Module‚Ì”‚¾‚¯ƒ‹[ƒv
+  //Moduleã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—
   for i := 0 to Project.GetModuleCount - 1 do
   begin
     ModuleInfo := Project.GetModule(i);
 
-    //ƒtƒH[ƒ€‚ğƒGƒfƒBƒ^‚Å•\¦‚µ‚Ä‚¢‚éAƒtƒH[ƒ€•\¦‚ÉØ‘Ö‚¦‚é
+    //ãƒ•ã‚©ãƒ¼ãƒ ã‚’ã‚¨ãƒ‡ã‚£ã‚¿ã§è¡¨ç¤ºã—ã¦ã„ã‚‹æ™‚ã€ãƒ•ã‚©ãƒ¼ãƒ è¡¨ç¤ºã«åˆ‡æ›¿ãˆã‚‹
     if ModuleInfo.FormName <> '' then
     begin
       Module := ModuleInfo.OpenModule;
@@ -82,14 +82,14 @@ begin
     end;
     if not Assigned(Module) then Continue;
 
-    //Editor‚Ì”‚¾‚¯ƒ‹[ƒv
+    //Editorã®æ•°ã ã‘ãƒ«ãƒ¼ãƒ—
     for j := 0 to Module.ModuleFileCount - 1 do
     begin
       Editor := Module.ModuleFileEditors[j];
       if Supports(Editor, IOTASourceEditor, SourceEditor) and
          Supports(Editor, IOTAEditBuffer, EditBuffer) then
       begin
-        //•ÏX‚ ‚è‚©H
+        //å¤‰æ›´ã‚ã‚Šã‹ï¼Ÿ
         if SourceEditor.Modified then
         begin
           BackupSource(BackupFolder, EditBuffer);
@@ -100,7 +100,7 @@ begin
 end;
 
 //*****************************************************************************
-//[ ŠT  —v ] ’è‹`‚ª‚È‚¢‚ÆƒGƒ‰[
+//[ æ¦‚  è¦ ] å®šç¾©ãŒãªã„ã¨ã‚¨ãƒ©ãƒ¼
 //*****************************************************************************
 procedure TDebuggerNotifier.ProcessDestroyed(const Process: IOTAProcess); begin end;
 procedure TDebuggerNotifier.BreakpointAdded(const Breakpoint: IOTABreakpoint); begin end;

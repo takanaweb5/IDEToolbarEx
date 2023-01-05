@@ -1,4 +1,4 @@
-object MethodListForm: TMethodListForm
+﻿object MethodListForm: TMethodListForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMaximize]
@@ -270,7 +270,7 @@ object MethodListForm: TMethodListForm
       Caption = '-'
     end
     object miGoBack: TMenuItem
-      Caption = #12459#12540#12477#12523#20301#32622#12408#25147#12427
+      Caption = #32232#38598#34892#12408#25147#12427'(&I)'
       OnClick = miGoBackClick
     end
   end

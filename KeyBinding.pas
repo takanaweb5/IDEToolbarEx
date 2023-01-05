@@ -14,17 +14,12 @@ type
   private
     FAllText: string;
     FStartLineArray: TLineInfoArray;
-    FWindowHandle: THandle;
 		procedure GoNextMethod (const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
 		procedure SelectMethod (const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-    procedure ShowForm     (const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-		procedure TabKeyPress  (const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
     procedure LeftKeyPress (const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
     procedure RightKeyPress(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
     function WaitForKeyMsgOver(): Boolean;
     procedure JumpNextMethod(PrevOrNext: Integer);
-    procedure TimerProc;
-    procedure WndProc(var Msg: TMessage);
 	public
 		{お約束}
 		procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
@@ -35,7 +30,6 @@ type
 
 var
 	BindNo: Integer;
-  FKeyRepeat: Boolean;
 
 { TKeyBinding }
 //*****************************************************************************
@@ -53,16 +47,16 @@ begin
 	//→
 	BindingServices.AddKeyBinding([ShortCut(VK_RIGHT,[])], RightKeyPress, nil);
 
-	//Tab
-	BindingServices.AddKeyBinding([ShortCut(VK_TAB, [])],       TabKeyPress, Pointer(+1));
-	//Shift + Tab
-	BindingServices.AddKeyBinding([ShortCut(VK_TAB, [ssShift])],TabKeyPress, Pointer(-1));
-
 	//Ctrl + Shitf + A
 	BindingServices.AddKeyBinding([ShortCut(Ord('A'), [ssCtrl, ssShift])], SelectMethod, nil);
 
-	//F10
-	BindingServices.AddKeyBinding([ShortCut(VK_F10, [])], ShowForm, nil);
+//	//Tab
+//	BindingServices.AddKeyBinding([ShortCut(VK_TAB, [])],       TabKeyPress, Pointer(+1));
+//	//Shift + Tab
+//	BindingServices.AddKeyBinding([ShortCut(VK_TAB, [ssShift])],TabKeyPress, Pointer(-1));
+//
+//	//F10
+//	BindingServices.AddKeyBinding([ShortCut(VK_F10, [])], ShowForm, nil);
 end;
 
 //*****************************************************************************
@@ -130,39 +124,6 @@ begin
   EditView.Paint;
 end;
 
-
-procedure TKeyBinding.WndProc(var Msg: TMessage);
-begin
-  with Msg do
-  begin
-    if Msg = WM_USER then
-    begin
-      Beep;
-//      SLeep(500);
-      TimerProc;
-    end;
-      Result := DefWindowProc(FWindowHandle, Msg, wParam, lParam);
-  end;
-end;
-
-//*****************************************************************************
-//[ 概  要 ]　Ctrl+↓ または Ctrl+↑ が離されるのを監視する
-//            キーが離されるとFKeyRepeatにFalseを設定し処理を終了する
-//*****************************************************************************
-procedure TKeyBinding.TimerProc();
-var
-  Meaage: TMsg;
-begin
-//  Beep();
-//  while PeekMessage(Meaage, 0, 0, 0, PM_REMOVE) do;
-
-  //キーが押されている間はループを繰り返す
-  FKeyRepeat := (GetAsyncKeyState(VK_CONTROL) < 0) and
-               ((GetAsyncKeyState(VK_UP) < 0) or (GetAsyncKeyState(VK_DOWN) < 0));
-  if FKeyRepeat then
-    PostMessage(FWindowHandle, WM_USER, 0, 0);
-end;
-
 //*****************************************************************************
 //[ 概  要 ]　次のメソッドへ移動
 //*****************************************************************************
@@ -171,21 +132,14 @@ begin
 	BindingResult := krHandled;
   if not CheckEditView() then Exit;
 
-//  if not FKeyRepeat then
-//  begin
-    FAllText := GetAllText();
-    FStartLineArray := nil;
-    if GetStartLineArray(FAllText, FStartLineArray) = 0 then Exit;
-//  end;
+  FAllText := GetAllText();
+  FStartLineArray := nil;
+  if GetStartLineArray(FAllText, FStartLineArray) = 0 then Exit;
 
   JumpNextMethod(Integer(Context.Context));
 
   //キーを押し続けたときのリピートによる慣性を止める
-  FKeyRepeat := WaitForKeyMsgOver();
-
-//  if FWindowHandle = 0 then
-//    FWindowHandle := Classes.AllocateHWnd(WndProc);
-//  TimerProc();
+  WaitForKeyMsgOver();
 end;
 
 //*****************************************************************************
@@ -226,36 +180,6 @@ begin
 
   //再描画
   EditView.Paint;
-end;
-
-//*****************************************************************************
-//[ 概  要 ]　メソッド一覧フォームを表示する
-//*****************************************************************************
-procedure TKeyBinding.ShowForm(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-begin
-	BindingResult := krHandled;
-  MainModule.OnShowMethodFormClick(nil);
-end;
-
-//*****************************************************************************
-//[ 概  要 ]　インデント
-//*****************************************************************************
-procedure TKeyBinding.TabKeyPress(const Context: IOTAKeyContext; KeyCode: TShortCut; var BindingResult: TKeyBindingResult);
-begin
-  BindingResult := krHandled;
-  if EditView.Block.Size > 0 then
-  begin
-    //ブロック選択の時
-    MainModule.Indent(Integer(Context.Context));
-  end
-  else
-  begin
-    //ブロック選択でなければTABを挿入
-    if Integer(Context.Context) > 0 then
-    begin
-      EditView.Position.InsertCharacter(#9);
-    end;
-  end;
 end;
 
 //*****************************************************************************
@@ -301,7 +225,7 @@ begin
   if not CheckEditView() then Exit;
 
   //カーソル位置＜行末
-  if EditView.Position.Column < GetEOLColumn() then
+  if EditView.Position.Column < GetEOLColumn() - 1 then
   begin
     EditView.Position.MoveRelative(0, 1);
   end
