@@ -38,7 +38,6 @@ contains
   GlobalUnit in 'GlobalUnit.pas',
   KeyBinding in 'KeyBinding.pas',
   MethodForm in 'MethodForm.pas' {MethodListForm},
-  Module in 'Module.pas' {MainModule: TDataModule},
-  OnDebug in 'OnDebug.pas';
+  Module in 'Module.pas' {MainModule: TDataModule};
 
 end.
