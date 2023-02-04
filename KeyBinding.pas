@@ -140,6 +140,7 @@ begin
 
   //キーを押し続けたときのリピートによる慣性を止める
   WaitForKeyMsgOver();
+//  OutputDebugLog('GoNextMethod '+ WaitForKeyMsgOver.ToString);
 end;
 
 //*****************************************************************************
@@ -214,6 +215,7 @@ begin
 
   //キーを押し続けたときのリピートによる慣性を止める
   WaitForKeyMsgOver();
+//  OutputDebugLog('LeftKeyPress '+ WaitForKeyMsgOver.ToString);
 end;
 
 //*****************************************************************************
@@ -245,6 +247,7 @@ begin
 
   //キーを押し続けたときのリピートによる慣性を止める
   WaitForKeyMsgOver();
+//  OutputDebugLog('RightKeyPress '+ WaitForKeyMsgOver.ToString);
 end;
 
 //*****************************************************************************

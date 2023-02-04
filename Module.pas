@@ -445,6 +445,7 @@ end;
 procedure Register;
 begin
   MainModule := TMainModule.Create(nil);
+//  OutputDebugLog('Register');
 end;
 
 //*****************************************************************************
