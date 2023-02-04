@@ -456,21 +456,21 @@ end;
 //*****************************************************************************
 procedure TMethodListForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  case ModalResult of
-  mrOk : ;//何もしない
+//  case ModalResult of
+//  mrOk : ;//何もしない
+////   begin
+////    //選択されたメソッドのロジック開始位置へカーソルを移動
+////    LineNo := GetLineInfo(ListBox.ItemIndex).LineNo;
+////    LineNo := GetMethodLineInfo(LineNo, FText).LogicStart;
+////    EditView.Position.Move(LineNo, 1);
+////   end;
+//  mrCancel :
 //   begin
-//    //選択されたメソッドのロジック開始位置へカーソルを移動
-//    LineNo := GetLineInfo(ListBox.ItemIndex).LineNo;
-//    LineNo := GetMethodLineInfo(LineNo, FText).LogicStart;
-//    EditView.Position.Move(LineNo, 1);
+//    //フォーム起動時のカーソル位置を表示
+//    EditView.SetTopLeft(FTopRow, 1);
+//    EditView.SetCursorPos(FEditPos);
 //   end;
-  mrCancel :
-   begin
-    //フォーム起動時のカーソル位置を表示
-    EditView.SetTopLeft(FTopRow, 1);
-    EditView.SetCursorPos(FEditPos);
-   end;
-  end;
+//  end;
 
   EditView.Paint;
 
@@ -489,17 +489,17 @@ end;
 //*****************************************************************************
 procedure TMethodListForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if ModalResult = mrOk then Exit;
-
-  if (FTopRow <> EditView.TopRow) or (FEditPos.Line <> EditView.CursorPos.Line) then
-  begin
-    case MessageDlg('元の位置に戻しますか？', mtInformation,
-                                      [mbYes, mbNo, mbCancel], 0) of
-    mrYes   : ModalResult := mrCancel;
-    mrNo    : ModalResult := mrOk;
-    mrCancel: CanClose := False;
-    end;
-  end;
+//  if ModalResult = mrOk then Exit;
+//
+//  if (FTopRow <> EditView.TopRow) or (FEditPos.Line <> EditView.CursorPos.Line) then
+//  begin
+//    case MessageDlg('元の位置に戻しますか？', mtInformation,
+//                                      [mbYes, mbNo, mbCancel], 0) of
+//    mrYes   : ModalResult := mrCancel;
+//    mrNo    : ModalResult := mrOk;
+//    mrCancel: CanClose := False;
+//    end;
+//  end;
 end;
 
 //*****************************************************************************
