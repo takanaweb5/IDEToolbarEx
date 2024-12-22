@@ -1,4 +1,4 @@
-﻿object MethodListForm: TMethodListForm
+object MethodListForm: TMethodListForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMaximize]
@@ -12,7 +12,6 @@
   Font.Name = #65325#65331' '#65328#12468#12471#12483#12463
   Font.Style = []
   KeyPreview = True
-  OldCreateOrder = False
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
@@ -22,7 +21,6 @@
   DesignSize = (
     582
     359)
-  PixelsPerInch = 96
   TextHeight = 13
   object ListBox: TListBox
     Left = 0
@@ -46,9 +44,11 @@
     OnDrawItem = ListBoxDrawItem
     OnKeyPress = ListBoxKeyPress
     OnMouseDown = ListBoxMouseDown
+    ExplicitLeft = 8
+    ExplicitTop = 4
   end
   object cmdOK: TButton
-    Left = 491
+    Left = 489
     Top = 321
     Width = 80
     Height = 24
@@ -57,6 +57,8 @@
     Default = True
     TabOrder = 5
     OnClick = cmdOKClick
+    ExplicitLeft = 487
+    ExplicitTop = 313
   end
   object chkMethodName: TCheckBox
     Left = 132
@@ -66,6 +68,7 @@
     Anchors = [akLeft, akBottom]
     Caption = #21516#12376#12513#12477#12483#12489#12398#12415
     TabOrder = 4
+    ExplicitTop = 327
   end
   object chkSort: TCheckBox
     Left = 15
@@ -75,6 +78,7 @@
     Anchors = [akLeft, akBottom]
     Caption = #12477#12540#12488
     TabOrder = 2
+    ExplicitTop = 327
   end
   object chkClassName: TCheckBox
     Left = 132
@@ -84,6 +88,7 @@
     Anchors = [akLeft, akBottom]
     Caption = #21516#12376#12463#12521#12473#12398#12415
     TabOrder = 3
+    ExplicitTop = 301
   end
   object cmbCommand: TComboBox
     Left = 12
@@ -106,6 +111,7 @@
       'function'
       'constructor'
       'destructor')
+    ExplicitTop = 299
   end
   object ImageList: TImageList
     Left = 112

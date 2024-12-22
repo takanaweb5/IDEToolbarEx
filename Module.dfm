@@ -1,12 +1,12 @@
-﻿object MainModule: TMainModule
-  OldCreateOrder = False
+object MainModule: TMainModule
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
-  Height = 150
-  Width = 215
+  Height = 188
+  Width = 269
+  PixelsPerInch = 120
   object IconList: TImageList
-    Left = 48
-    Top = 88
+    Left = 60
+    Top = 110
     Bitmap = {
       494C010109001000040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
@@ -413,7 +413,12 @@
   end
   object ApplicationEvents: TApplicationEvents
     OnIdle = ApplicationEventsIdle
-    Left = 104
-    Top = 32
+    Left = 130
+    Top = 40
+  end
+  object ActionList: TActionList
+    Images = IconList
+    Left = 152
+    Top = 112
   end
 end

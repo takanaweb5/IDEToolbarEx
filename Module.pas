@@ -12,6 +12,7 @@ type
   TMainModule = class(TDataModule)
     IconList: TImageList;
     ApplicationEvents: TApplicationEvents;
+    ActionList: TActionList;
     procedure ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
@@ -89,11 +90,13 @@ begin
   IDEServices := (BorlandIDEServices as INTAServices);
   ToolBar := IDEServices.NewToolbar(TOOLBAR_NAME, 'ユーザ定義ツールバー');
   Assert(Assigned(ToolBar), 'ユーザ定義のツールバーの作成に失敗しました');
+  ToolBar.Images := IconList;
 
   SetLength(FActions, 8);
   for i := 0 to High(FActions) do
   begin
-    FActions[i] := TAction.Create(nil);
+    FActions[i] := TAction.Create(ActionList);
+    FActions[i].ActionList := ActionList;
   end;
   Events[0] := OnSetBookmarkClick;
   Events[1] := OnNextBookmarkClick;
@@ -109,13 +112,13 @@ begin
   for i := 0 to High(FActions) do
   begin
     //セパレータの設定
-    case i of
-      3:begin
-        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
-        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
-      end;
-      5: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
-    end;
+//    case i of
+//      3:begin
+//        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider1',nil ,True);
+//        IDEServices.AddToolButton(TOOLBAR_NAME,'Divider2',nil ,True);
+//      end;
+//      5: IDEServices.AddToolButton(TOOLBAR_NAME,'Divider3',nil ,True);
+//    end;
     ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,ButtonName[i] ,nil ,True) as TToolButton;
     with FActions[i] do
     begin
@@ -128,12 +131,12 @@ begin
         7: ShortCut := TextToShortCut('F10');
       end;
     end;
-    //IDEServices.ActionListとのひもづけを行う
-    IDEServices.AddActionMenu('', FActions[i] , nil);
+//    //IDEServices.ActionListとのひもづけを行う
+//    IDEServices.AddActionMenu('', FActions[i] , nil);
     Icon := TIcon.Create;
     try
       IconList.GetIcon(i,Icon);
-      FActions[i].ImageIndex := FActions[i].Images.AddIcon(Icon);
+      FActions[i].ImageIndex := i;
     finally
       Icon.Free;
     end;
@@ -141,31 +144,34 @@ begin
     begin
       Style      := tbsButton;
       Action     := FActions[i];
+      case i of
+        3,4: Visible := false;
+      end;
     end;
   end;
 
-  //次を検索ボタン
-  i := GetIndexFromActionList('SearchAgainCommand');
-  if i <> -1 then
-  begin
-    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'FindNext' ,nil, True, 'Divider1') as TToolButton;
-    with ToolButton do
-    begin
-      Style      := tbsButton;
-      Action     := IDEServices.ActionList[i];
-    end;
-  end;
-  //検索ボタン
-  i := GetIndexFromActionList('SearchFindCommand');
-  if i <> -1 then
-  begin
-    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'Find' ,nil ,True, 'Divider1') as TToolButton;
-    with ToolButton do
-    begin
-      Style      := tbsButton;
-      Action     := IDEServices.ActionList[i];
-    end;
-  end;
+//  //次を検索ボタン
+//  i := GetIndexFromActionList('SearchAgainCommand');
+//  if i <> -1 then
+//  begin
+//    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'FindNext' ,nil, True, 'Divider1') as TToolButton;
+//    with ToolButton do
+//    begin
+//      Style      := tbsButton;
+//      Action     := IDEServices.ActionList[i];
+//    end;
+//  end;
+//  //検索ボタン
+//  i := GetIndexFromActionList('SearchFindCommand');
+//  if i <> -1 then
+//  begin
+//    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME ,'Find' ,nil ,True, 'Divider1') as TToolButton;
+//    with ToolButton do
+//    begin
+//      Style      := tbsButton;
+//      Action     := IDEServices.ActionList[i];
+//    end;
+//  end;
 
 //    ToolButton := IDEServices.AddToolButton(TOOLBAR_NAME,'ElseMenu',nil ,True) as TToolButton;
 //  with ToolButton do
